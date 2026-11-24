@@ -1,0 +1,57 @@
+# Puts the app online on GitHub Pages with every push to main (or by hand, under Actions):
+# builds it (the types are checked as it does) and publishes frontend/dist. The site's domain
+# is set in the repository's Settings -> Pages, not here.
+#
+# Two optional secrets (Settings -> Secrets and variables -> Actions):
+#   VITE_REPORT_KEY        the key of the Report a problem form (Web3Forms)
+#   VITE_ANALYTICS_TOKEN   the token of Cloudflare Web Analytics, to count visits
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write # to publish the site
+  id-token: write # to prove the site comes from this repository
+
+# one deployment at a time; a newer push waits rather than cancelling one half done
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          VITE_REPORT_KEY: ${{ secrets.VITE_REPORT_KEY }}
+          VITE_ANALYTICS_TOKEN: ${{ secrets.VITE_ANALYTICS_TOKEN }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

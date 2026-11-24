@@ -1,0 +1,7 @@
+/* The picture of a kind of vehicle, or of walking (KindIcon.tsx): grey beside the text, unless
+   what it stands in gives it a colour. */
+
+.kind-icon {
+  flex: none;
+  color: var(--ink-dim);
+}

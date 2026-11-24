@@ -1,0 +1,77 @@
+/* Choosing a kind and a line (ui/lines/LinePicker.tsx). */
+
+/* the kinds: the segmented control (styles/page.css) in three parts, each with its picture */
+.segmented.kinds {
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  margin-bottom: var(--gap-wide);
+}
+.segmented.kinds::before {
+  width: calc((100% - 4px) / var(--count));
+  translate: calc(var(--on, 0) * 100%) 0;
+}
+.segmented.kinds button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.segmented.kinds button .kind-icon {
+  color: inherit;
+}
+
+/* the lines: every badge the same width, in rows that fill the panel, scrolling when there are
+   more than fit; they come in one after the other when the kind changes */
+.chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 8px;
+  flex-shrink: 1;
+  min-height: 0;
+  margin-bottom: var(--gap);
+  padding: 2px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.chip.ride-line {
+  min-width: 0;
+  height: 34px;
+  padding: 0;
+  border: none;
+  font-size: var(--text-strong);
+  font-weight: 700;
+  cursor: pointer;
+  animation: chip-in 320ms var(--ease) backwards;
+  animation-delay: calc(var(--i) * 12ms);
+  transition:
+    opacity var(--answer),
+    filter var(--answer),
+    scale 260ms var(--spring);
+}
+@media (hover: hover) {
+  .chip.ride-line:hover {
+    filter: brightness(1.12);
+  }
+}
+.chip.ride-line:active {
+  scale: 0.92;
+}
+/* nothing runs in the next hour */
+.chip.idle {
+  opacity: 0.3;
+}
+@media (hover: hover) {
+  .chip.idle:hover {
+    opacity: 0.55;
+  }
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip.ride-line {
+    animation: none;
+  }
+}

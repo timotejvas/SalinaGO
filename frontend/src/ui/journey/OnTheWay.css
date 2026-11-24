@@ -1,0 +1,55 @@
+/* on the way: the way you are on alone, under a title and its × (OnTheWay.tsx) */
+.journey.riding > * {
+  animation: ride-in 420ms var(--ease) backwards;
+}
+.journey.riding > :nth-child(2) {
+  animation-delay: 60ms;
+}
+@keyframes ride-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+.ride-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: 2px 2px 0;
+}
+.ride-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--live);
+  font-size: var(--text-strong);
+  font-weight: 650;
+  /* green on time, orange late: the change fades rather than jumps */
+  transition: color 300ms ease;
+}
+.ride-title.late {
+  color: var(--late);
+}
+/* under it, nearing the stop where you change: the line you change to and how far it is */
+.ride-next {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 2px 2px var(--gap-tight);
+  color: var(--ink-dim);
+  font-size: var(--text);
+  font-weight: 600;
+  animation: panel-swap 380ms var(--ease) backwards;
+}
+.ride-next.live {
+  color: var(--live);
+}
+.ride-title .trip-late {
+  margin-left: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey.riding > * {
+    animation: none;
+  }
+}

@@ -1,0 +1,134 @@
+/* One end of a journey (PlaceField.tsx): the field, the place chosen in it, and what matches
+   what is typed - each with the round mark of what it is (also on a station's card). */
+
+/* one field: where from, where to */
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  min-height: 40px;
+  padding: 0 var(--gap-tight) 0 0;
+}
+.field + .field {
+  border-top: 1px solid var(--edge);
+}
+.field-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+.field-input::placeholder {
+  color: var(--ink-faint);
+}
+.field-chosen {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  min-width: 0;
+}
+.field-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.field-clear {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: var(--control);
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer);
+}
+@media (hover: hover) {
+  .field-clear:hover {
+    background: var(--lifted);
+    color: var(--ink);
+  }
+}
+
+/* the stations and addresses that match what was typed: each with a round mark of what it is,
+   its name, and under it the lines that stop there or the part of the town */
+.field-matches {
+  position: absolute;
+  top: calc(100% + var(--gap-tight));
+  left: 0;
+  right: 0;
+  z-index: 2;
+  margin: 0;
+  padding: var(--gap-tight);
+  list-style: none;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--solid);
+  backdrop-filter: var(--glass);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.field-matches button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px var(--gap);
+  border: none;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--answer);
+}
+@media (hover: hover) {
+  .field-matches button:hover {
+    background: var(--lifted);
+  }
+}
+.place-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.25);
+}
+.place-mark .kind-icon {
+  width: 13px;
+  height: 13px;
+  color: inherit; /* the ink the mark gives it, not the grey of the cards */
+}
+.place-mark.address {
+  background: #8e8e93;
+  color: #ffffff;
+  --icon-hole: #8e8e93;
+}
+.field-what {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+.field-more {
+  overflow: hidden;
+  color: var(--ink-faint);
+  font-size: var(--text-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.field-area {
+  color: var(--ink-faint);
+}

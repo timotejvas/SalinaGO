@@ -1,0 +1,152 @@
+/* What you ask for (JourneySearch.tsx): the two ends as one block, and Search; on a phone the
+   same folded into one row once the ways are found. */
+
+/* the two ends as one block: the marks of the route on the left, the two fields, the swap */
+.ends {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--raised);
+  transition: border-color var(--answer);
+}
+.ends:focus-within {
+  border-color: var(--ink-dim);
+}
+/* on a phone, once the ways are found: the same block folded into one row - the two names
+   under each other, and when - that opens the form again (JourneyPlanner.tsx) */
+.ends-folded {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  padding: 0 var(--gap-wide) 0 0;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--raised);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  animation: panel-swap 380ms var(--ease) backwards;
+}
+.ends-folded .ends-marks {
+  padding: 11px 0;
+}
+.ends-folded-names {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 0;
+  font-weight: 600;
+}
+.ends-folded-names > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ends-folded-when {
+  align-self: center;
+  flex: none;
+  margin-left: var(--gap);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--control);
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+  font-weight: 600;
+}
+.ends-marks {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  width: 28px;
+  padding: 15px 0;
+}
+.ends-from,
+.ends-to {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.ends-from {
+  border: 2px solid var(--ink-dim);
+}
+.ends-to {
+  background: var(--ink);
+}
+/* the route between them, dotted */
+.ends-line {
+  flex: 1;
+  width: 0;
+  margin: 3px 0;
+  border-left: 2px dotted var(--edge);
+}
+.ends-fields {
+  flex: 1;
+  min-width: 0;
+}
+.ends .swap {
+  flex: none;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 var(--gap);
+  border: 1px solid var(--edge);
+  border-radius: 50%;
+  background: var(--control);
+  color: var(--ink-dim);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color var(--answer),
+    color var(--answer),
+    transform 250ms ease;
+}
+@media (hover: hover) {
+  .ends .swap:hover:not(:disabled) {
+    border-color: var(--ink-dim);
+    color: var(--ink);
+  }
+}
+.ends .swap:active:not(:disabled) {
+  transform: rotate(180deg);
+}
+.ends .swap:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* the one thing to press once the fields are filled */
+.search {
+  height: 38px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: #101016;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer),
+    transform 120ms ease;
+}
+@media (hover: hover) {
+  .search:hover:not(:disabled) {
+    background: #ffffff;
+  }
+}
+.search:active:not(:disabled) {
+  transform: scale(0.98);
+}
+/* before both ends are chosen it waits quietly rather than glare grey */
+.search:disabled {
+  background: var(--control);
+  color: var(--ink-faint);
+  cursor: default;
+}

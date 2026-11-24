@@ -1,0 +1,125 @@
+/* when you are leaving (LeaveWhen.tsx): now or at a time you pick, a day and a time */
+.when {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+}
+.when-kind button {
+  padding: var(--gap-tight) var(--gap);
+  font-size: var(--text-meta);
+}
+.when-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+/* Now | Later: two halves of one control */
+.when-mode {
+  position: relative;
+  display: flex;
+  flex: 1;
+  padding: 2px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-small);
+  background: var(--raised);
+}
+/* the thumb under the chosen half, sliding across when the choice changes */
+.when-mode::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  border-radius: 4px;
+  background: var(--lifted);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: translate 380ms var(--settle);
+}
+.when-mode[data-on="1"]::before {
+  translate: 100% 0;
+}
+.when-mode button {
+  position: relative; /* over the thumb */
+  flex: 1;
+  padding: var(--gap-tight) var(--gap);
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: var(--text-meta);
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer);
+}
+@media (hover: hover) {
+  .when-mode button:hover {
+    color: var(--ink);
+  }
+}
+.when-mode button[aria-pressed="true"] {
+  color: var(--ink);
+}
+
+.when-day,
+.when-clock {
+  height: 30px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-small);
+  background: var(--control);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-meta);
+  transition: border-color var(--answer);
+}
+@media (hover: hover) {
+  .when-day:hover,
+  .when-clock:hover,
+  .when-clock:focus-within {
+    border-color: var(--ink-dim);
+  }
+}
+.when-day {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--gap);
+  cursor: pointer;
+}
+/* the time between a minus and a plus */
+.when-clock {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  overflow: hidden;
+}
+.when-clock button {
+  width: 28px;
+  border: none;
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer);
+}
+@media (hover: hover) {
+  .when-clock button:hover {
+    background: var(--lifted);
+    color: var(--ink);
+  }
+}
+.when-clock input {
+  width: 44px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+}

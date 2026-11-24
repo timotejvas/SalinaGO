@@ -1,0 +1,389 @@
+/* The strip of stops (ui/Strip.tsx). Each row carries its own --line-color, so that a
+   journey of two lines changes colour where you change. */
+
+.strip {
+  --row: 28px; /* the height of a row of one line */
+  margin: var(--gap-wide) 0 0;
+  padding: 0 0 0 8px; /* room on the left for the ring round a live vehicle */
+  list-style: none;
+}
+
+.strip li {
+  /* how far down the row its circle is: the middle of a row of one line, whatever its height
+     (taller for a finger, Panel.css); every piece of the line below is placed from it */
+  --mid: calc(var(--row) / 2);
+  position: relative;
+  /* the margins of what is under a name stay inside its row, or the line through the row would
+     stop short of the next one */
+  display: flow-root;
+}
+
+/* the line through the circles, in two pieces in every row: the one into its circle, in the
+   colour of the line that brought you (::before), and the one out of it, in the colour of the
+   one you go on with (::after) - so that at a change the line changes colour in the circle.
+   The circle is half a row of one line down the row (--mid), not in its middle, which is lower when a stop is open and
+   shows its departures under it. */
+.strip li::before,
+.strip li::after {
+  content: "";
+  position: absolute;
+  left: 9.5px;
+  width: 3px;
+}
+/* each piece stops at the edge of its circle (7px round the middle), so that the circles are
+   open in the middle and the line does not show through them */
+.strip li::before {
+  top: 0;
+  height: calc(var(--mid) - 7px);
+  background: var(--line-before, var(--line-color));
+}
+.strip li::after {
+  top: calc(var(--mid) + 7px);
+  bottom: 0;
+  background: var(--line-color);
+}
+.strip li:first-child::before,
+.strip li:last-child::after {
+  display: none;
+}
+/* a row of live vehicles has no circle: its line goes on unbroken */
+.strip li.strip-riding::before {
+  height: 50%;
+}
+.strip li.strip-riding::after {
+  top: 50%;
+}
+
+.strip button {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-wide);
+  width: 100%;
+  min-height: var(--row);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--answer);
+}
+@media (hover: hover) {
+  .strip button:hover .strip-name {
+    color: #ffffff;
+    text-decoration: underline;
+  }
+}
+
+.strip-dot {
+  position: relative; /* above the line */
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-left: var(--gap-tight);
+  transition:
+    width var(--answer),
+    height var(--answer),
+    background-color 220ms ease,
+    transform 420ms var(--spring); /* a little past its size and back */
+  border: 2.5px solid var(--line-color);
+  border-radius: 50%;
+  background: var(--solid);
+}
+
+/* the first and the last stop: bigger and bold */
+.strip li.end .strip-dot {
+  width: 8px;
+  height: 8px;
+  margin-left: 3px;
+  border-width: 4px;
+  background: #ffffff;
+}
+.strip li.end .strip-name {
+  font-weight: 700;
+}
+
+.strip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* a journey: when you are there, and the line you get on here */
+.strip-time {
+  margin-left: auto;
+  padding-left: var(--gap);
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.strip-badge {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--line-color);
+  color: var(--line-ink, #101016);
+  font-size: var(--text-meta);
+  font-weight: 700;
+}
+
+/* the line you get on at a stop and where it goes, under its name: one chip */
+.strip-board {
+  display: flex;
+  align-items: stretch;
+  width: fit-content;
+  max-width: calc(100% - 18px - var(--gap-wide));
+  margin: 0 0 6px calc(18px + var(--gap-wide));
+  overflow: hidden;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--line-color) 20%, transparent);
+  font-size: var(--text-meta);
+  font-weight: 650;
+  animation: strip-board-in 320ms var(--ease) backwards;
+}
+.strip-board-line {
+  flex: none;
+  min-width: 24px;
+  padding: 2px 7px;
+  background: var(--line-color);
+  color: var(--line-ink, #101016);
+  text-align: center;
+}
+.strip-board-to {
+  overflow: hidden;
+  padding: 2px 9px 2px 8px;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@keyframes strip-board-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-board {
+    animation: none;
+  }
+}
+
+/* where you walk on from a stop, and arrive at the next one on foot: the line is dashed in
+   white, as the walk is on the map */
+.strip li.broken::after,
+.strip li.walked::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.75) 0 4px,
+    transparent 4px 8px
+  );
+}
+.strip li.broken .strip-dot {
+  width: 11px;
+  height: 11px;
+  margin-left: 3px;
+  border-color: #ffffff;
+  background: var(--solid);
+}
+.strip li.broken .strip-name {
+  font-weight: 700;
+}
+
+/* a change from one line to another: the circle is half the colour of each */
+.strip li.split .strip-dot {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--solid), var(--solid)) padding-box,
+    linear-gradient(to bottom, var(--line-before) 50%, var(--line-color) 50%) border-box;
+}
+
+/* the first or the last stop where you walk on from: as big as any end, ringed in white */
+.strip li.end.broken .strip-dot {
+  width: 8px;
+  height: 8px;
+  border-width: 4px;
+}
+
+/* a stop that stands out: where you change */
+.strip li.strong .strip-name {
+  font-weight: 700;
+}
+
+/* the stop that was clicked: its circle fills with the colour of the line and grows with a
+   little spring, a ring goes out of it once, and its name moves a step out and turns white -
+   and back as smoothly when another one is clicked */
+.strip-name {
+  transition:
+    color 220ms ease,
+    transform 420ms var(--settle);
+}
+.strip li.picked .strip-dot {
+  background-color: var(--line-color);
+  transform: scale(1.5);
+}
+.strip li.picked .strip-dot::after {
+  content: "";
+  position: absolute;
+  inset: -2.5px;
+  border: 2px solid var(--line-color);
+  border-radius: 50%;
+  animation: strip-picked 700ms var(--ease) both;
+}
+@keyframes strip-picked {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+.strip li.picked .strip-name {
+  color: #ffffff;
+  font-weight: 700;
+  transform: translateX(4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-dot,
+  .strip-name {
+    transition: none;
+  }
+  .strip li.picked .strip-dot::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+/* walking from this stop to the next one */
+.strip-walk {
+  min-height: 20px;
+  padding-left: calc(18px + var(--gap-wide)); /* under the name, where it starts */
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+}
+
+/* a row of its own for the live vehicles between two stops: the line goes on through it, and
+   each vehicle glides down it as it drives towards the next stop - the row is tall, so that the
+   move is there to see. Nothing blinks or rocks: it moves when the vehicle moves. */
+.strip li.strip-riding {
+  height: 44px;
+}
+.strip-rider {
+  position: absolute;
+  /* kept clear of the two stops, so that it never sits on one of them or on its name */
+  top: calc(12px + var(--share) * (100% - 24px));
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  height: 0;
+  transition: top 2s var(--ease-in-out);
+  pointer-events: none;
+}
+/* a vehicle standing at a stop: the same mark, on the stop's circle (--mid down the row),
+   arriving with a little spring */
+.strip-here {
+  position: absolute;
+  top: calc(var(--mid) - 11px);
+  left: 0;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  animation: strip-here-in 420ms var(--spring) backwards;
+}
+@keyframes strip-here-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+/* the vehicle: a round mark on the line in its colour, ringed in white, with its kind in it -
+   the way Maps marks a bus you are tracking */
+.strip-rider-marks {
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+.strip-rider-mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  background: var(--rider-color);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.45),
+    0 0 0 4px color-mix(in srgb, var(--rider-color) 22%, transparent);
+  color: #ffffff;
+  --icon-hole: var(--rider-color);
+}
+/* a thin ring that widens and fades from it, slowly, the way Maps shows where you are */
+.strip-rider-mark:not(.behind)::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border: 2px solid var(--rider-color);
+  border-radius: 50%;
+  animation: strip-rider-ring 2.4s var(--ease) infinite;
+}
+@keyframes strip-rider-ring {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+/* the picture in it white - or near black on a light line, the white of line 1 or the yellow
+   of the night buses, where white would not be seen (colors.ts, inkOn) */
+.strip-rider-mark .kind-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--rider-ink, #ffffff);
+  filter: drop-shadow(0 0.5px 0.5px rgba(0, 0, 0, 0.35));
+}
+/* the others at the same place, peeking out behind it */
+.strip-rider-mark.behind {
+  z-index: -1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  opacity: calc(0.75 - var(--behind) * 0.2);
+  transform: translateX(calc(var(--behind) * 7px)) scale(calc(1 - var(--behind) * 0.12));
+}
+.strip-rider-marks:has(.behind) {
+  margin-right: 10px;
+}
+/* how late it runs: green on time, orange otherwise */
+.strip-rider-note {
+  overflow: hidden;
+  color: var(--late);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.strip-rider-note.on-time {
+  color: var(--live);
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-rider {
+    transition: none;
+  }
+  .strip-here {
+    animation: none;
+  }
+  .strip-rider-mark::after {
+    animation: none;
+    opacity: 0;
+  }
+}

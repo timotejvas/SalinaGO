@@ -1,0 +1,2 @@
+# Keep the code with LF in the repository, whatever the editor writes on Windows.
+* text=auto eol=lf

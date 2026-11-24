@@ -1,0 +1,192 @@
+/* A station opened on the map, in the panel (ui/StationCard.tsx): a card as the journey cards
+   are, with a row for each line. */
+
+.station-card {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 1;
+  min-height: 0; /* a long strip scrolls inside it */
+  gap: var(--gap);
+  margin: var(--gap-tight) 0 var(--gap);
+  padding: var(--gap-wide);
+  border-radius: var(--radius);
+  background: var(--raised);
+  animation: station-in 380ms var(--ease);
+}
+@keyframes station-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+.station-card > * {
+  flex-shrink: 0;
+}
+.station-card > .scroll-list {
+  flex-shrink: 1;
+}
+.station-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+.station-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.station-title .place-mark {
+  width: 30px;
+  height: 30px;
+}
+.station-title .place-mark .kind-icon {
+  width: 15px;
+  height: 15px;
+}
+/* a long name goes on to a second line, the two about as long as each other, rather than be cut */
+.station-name {
+  min-width: 0;
+  font-size: var(--text-strong);
+  font-weight: 650;
+  line-height: 1.25;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.station-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--control);
+  color: var(--ink-dim);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer);
+}
+@media (hover: hover) {
+  .station-close:hover {
+    background: var(--lifted);
+    color: var(--ink);
+  }
+}
+
+/* each line: its number, when it leaves next, and that it opens */
+.station-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.station-lines li {
+  animation: station-in 340ms var(--ease) backwards;
+  animation-delay: calc(var(--i) * 35ms);
+}
+.station-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 6px;
+  border: none;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--answer);
+}
+@media (hover: hover) {
+  .station-line:hover {
+    background: var(--lifted);
+  }
+}
+.station-line .ride-line {
+  min-width: 34px;
+}
+.station-when {
+  flex: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.station-more {
+  color: var(--ink-faint);
+  font-size: var(--text-strong);
+}
+/* a line that does not run now: dimmed */
+.station-line.idle .ride-line {
+  opacity: 0.4;
+}
+.station-line.idle .station-when {
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .station-card,
+  .station-lines li {
+    animation: none;
+  }
+}
+
+/* a live vehicle in the same card (ui/VehicleCard.tsx): its line and where it goes as the
+   title, whether it runs late, and a way to the whole line */
+.vehicle-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.vehicle-now {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--live);
+  font-size: var(--text-meta);
+  font-weight: 600;
+}
+.vehicle-now.late {
+  color: var(--late);
+}
+.vehicle-whole {
+  margin-left: auto;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 999px;
+  background: var(--control);
+  color: var(--ink-dim);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer);
+}
+@media (hover: hover) {
+  .vehicle-whole:hover {
+    background: var(--lifted);
+    color: var(--ink);
+  }
+}
+.station-card .scroll-list {
+  min-height: 0;
+}

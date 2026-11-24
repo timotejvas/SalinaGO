@@ -1,0 +1,147 @@
+/* The loading screen (ui/LoadingScreen.tsx): frosted glass over the map, which loads under it
+   and shows through blurred; when everything is there the glass clears and what is on it
+   drifts forward and dissolves, so that the map comes into focus rather than appears. */
+
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 45%, rgba(24, 24, 32, 0.7) 0%, rgba(4, 4, 8, 0.92) 75%);
+  backdrop-filter: blur(40px) saturate(1.4);
+  color: #ececf1;
+  font-family: system-ui, sans-serif;
+  /* keep the longest in sync with FADE_MS */
+  transition:
+    opacity 800ms var(--ease-in-out),
+    backdrop-filter 800ms var(--ease-in-out);
+}
+.loading.done {
+  opacity: 0;
+  backdrop-filter: blur(0) saturate(1);
+  pointer-events: none;
+}
+
+/* the name and the line, coming out of the blur when the screen opens */
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: loading-in 900ms var(--ease) both;
+  transition:
+    transform 700ms var(--ease-in-out),
+    filter 700ms ease;
+}
+.loading.done .loading-content {
+  transform: scale(1.06);
+  filter: blur(6px);
+}
+@keyframes loading-in {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(0.94);
+  }
+}
+
+/* the route drawing: a thin line on the glass, drawn in red, the stops lighting up one by one */
+.loading-route {
+  width: 200px;
+  height: 50px;
+  overflow: visible;
+}
+.loading-track,
+.loading-line {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.loading-track {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+.loading-line {
+  stroke: var(--brand);
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  filter: drop-shadow(0 0 6px rgba(255, 90, 95, 0.5));
+  animation: loading-draw 1.8s var(--ease-in-out) infinite;
+}
+.loading-stop {
+  fill: #ffffff;
+  stroke: var(--brand);
+  stroke-width: 2.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: loading-stop 1.8s ease-in-out infinite;
+}
+@keyframes loading-draw {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  60%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes loading-stop {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+  35% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+/* the name and the text */
+.loading-name {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+.loading-name span {
+  color: var(--brand);
+}
+.loading-text {
+  min-height: 1.3em;
+  color: rgba(236, 236, 241, 0.55);
+  font-size: 13px;
+  animation: loading-line-in 500ms var(--ease) both;
+}
+@keyframes loading-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(3px);
+  }
+}
+/* who made it, at the foot of the screen */
+.loading-by {
+  position: absolute;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  color: rgba(236, 236, 241, 0.3);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+/* nothing moves for people who turned animations off */
+@media (prefers-reduced-motion: reduce) {
+  .loading-content,
+  .loading-text,
+  .loading-stop {
+    animation: none;
+  }
+  .loading-line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

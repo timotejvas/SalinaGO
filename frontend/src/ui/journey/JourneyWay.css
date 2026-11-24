@@ -1,0 +1,205 @@
+/* A way that was found (JourneyWay.tsx), as a card: when and how long, its lines, when it
+   leaves - and, picked, its stops opening under it (JourneyStrip.tsx). */
+
+/* what was found: one card per way there, a direct line or a way with a change, all of the
+   same shape - when it leaves and when it gets you there, how long it takes, then its lines */
+.rides {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  margin: var(--gap-tight) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.trip-card {
+  flex-shrink: 0; /* the list scrolls; a card never gets squeezed */
+  /* the cards rise into place one after another when the ways are found */
+  animation: trip-in 420ms var(--ease) backwards;
+  border: none;
+  border-radius: 12px;
+  background: var(--raised);
+  overflow: hidden;
+  transition:
+    background var(--answer),
+    border-color var(--answer);
+}
+@media (hover: hover) {
+  .trip-card:hover {
+    background: var(--control);
+  }
+}
+.trip-card.on {
+  background: var(--lifted);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+.trip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  width: 100%;
+  padding: var(--gap) var(--gap-wide);
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* from when to when, and how long: the two things you compare the ways by, equally big */
+.trip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+.trip-times,
+.trip-long {
+  font-size: var(--text-strong);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.trip-long {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.trip-long .stopwatch {
+  color: var(--ink-dim);
+}
+
+/* how you go: a picture of each kind with its line, a walk with its minutes, one after another */
+/* a long way with many changes goes on in a second line; with one line, its direction is cut
+   short when there is not room for all of it */
+.trip-chain {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.trip-ride,
+.trip-walk {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+.trip-walk {
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+}
+.trip-ride.first {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.trip-chain .trip-then {
+  flex: none;
+}
+/* where the line goes, beside its number and as big: it is what you look for on the vehicle */
+.trip-toward {
+  min-width: 0;
+  margin-left: 4px;
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trip-then {
+  color: var(--ink-faint);
+  font-size: var(--text);
+}
+
+/* when it leaves: the minutes, big, and how late as a small tag beside them; from where, under */
+.trip-go {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 2px;
+  font-size: var(--text-strong);
+  white-space: nowrap;
+}
+.trip-when {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink);
+  font-weight: 650;
+}
+.trip-when.live {
+  color: var(--live);
+}
+.trip-when.late {
+  color: var(--late);
+}
+.trip-when.gone {
+  color: var(--ink-faint);
+}
+/* how late: a small tag, not a second time to add */
+.trip-late {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--late-tint);
+  color: var(--late);
+  font-size: var(--text-meta);
+  font-weight: 600;
+}
+.trip-at {
+  overflow: hidden;
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* the stops of what is picked, under its card */
+.trip-card:nth-child(2) {
+  animation-delay: 50ms;
+}
+.trip-card:nth-child(3) {
+  animation-delay: 100ms;
+}
+.trip-card:nth-child(4) {
+  animation-delay: 150ms;
+}
+.trip-card:nth-child(n + 5) {
+  animation-delay: 200ms;
+}
+@keyframes trip-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+/* the stops open out of the card */
+.trip-card .ride-strip {
+  animation: strip-open 360ms var(--ease);
+}
+@keyframes strip-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trip-card,
+  .trip-card .ride-strip {
+    animation: none;
+  }
+}
+
+/* inside the card, under a hairline, as the rest of the same block */
+.ride-strip {
+  margin: 0 var(--gap-wide);
+  padding: 2px 0 var(--gap-wide);
+  border-top: 1px solid var(--edge);
+}
+.ride-strip .strip {
+  margin-top: var(--gap-tight);
+}

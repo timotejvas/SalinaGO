@@ -1,0 +1,53 @@
+/* The line saying whose work this is (ui/MadeBy.tsx): at the foot of the map, in the middle,
+   so faint that it is only there for whoever looks for it. */
+
+.made-by {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  z-index: 5;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.32);
+  font:
+    11px/1 system-ui,
+    sans-serif;
+  letter-spacing: 0.3px;
+  transform: translateX(-50%);
+  animation: made-by-in 800ms 600ms ease backwards;
+}
+@keyframes made-by-in {
+  from {
+    opacity: 0;
+  }
+}
+.made-by a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--answer);
+}
+@media (hover: hover) {
+  .made-by a:hover {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+/* on a narrower screen the map credits, open when the map opens, reach the middle: above them */
+@media (max-width: 1100px) {
+  .made-by {
+    bottom: 34px;
+  }
+}
+
+/* phones: the panel lies along the bottom and the top belongs to the live badge and the
+   clock; there is no room left for it, and it is in Settings anyway */
+@media (max-width: 600px) {
+  .made-by {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .made-by {
+    animation: none;
+  }
+}

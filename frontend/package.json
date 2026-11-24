@@ -1,0 +1,35 @@
+{
+  "name": "salinago",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "oxlint",
+    "format": "prettier --write .",
+    "data": "node scripts/build-data.mjs",
+    "data:update": "node scripts/update-data.mjs",
+    "data:schedule": "sh scripts/macos/schedule-update.sh"
+  },
+  "dependencies": {
+    "maplibre-gl": "^6.16.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "oxlint": "^1.90.0",
+    "papaparse": "^5.7.0",
+    "prettier": "^3.8.1",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

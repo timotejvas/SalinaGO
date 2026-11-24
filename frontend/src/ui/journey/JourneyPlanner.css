@@ -1,0 +1,55 @@
+/* Planning a journey (JourneyPlanner.tsx): the column of what you ask and what was found, and
+   what is said when there is nothing to show yet. Its parts are styled next to them:
+   JourneySearch.css, PlaceField.css, LeaveWhen.css, JourneyWay.css, OnTheWay.css. */
+
+.journey {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+.journey > * {
+  flex-shrink: 0;
+}
+.journey > .scroll-list {
+  flex-shrink: 1;
+}
+
+/* nothing was found: said quietly, in the place where the ways would be */
+.journey-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--gap-section) var(--gap);
+  border: 1px dashed var(--edge);
+  border-radius: 12px;
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+  text-align: center;
+}
+/* while the walks from an address are found: a quiet line that breathes */
+.journey-loading {
+  margin-top: var(--gap-wide);
+  padding: var(--gap-wide) var(--gap);
+  border-radius: 12px;
+  background: var(--raised);
+  color: var(--ink-dim);
+  font-size: var(--text);
+  text-align: center;
+  animation: journey-loading 1.4s ease-in-out infinite alternate;
+}
+@keyframes journey-loading {
+  from {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-loading {
+    animation: none;
+  }
+}
+.journey-empty strong {
+  color: var(--ink);
+  font-size: var(--text);
+  font-weight: 600;
+}

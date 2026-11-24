@@ -1,0 +1,31 @@
+/* The clock, in the widget in the top right corner (Corner.tsx). */
+
+.clock {
+  color: var(--ink);
+  font:
+    13px/1.25 system-ui,
+    sans-serif;
+}
+
+/* the time as a lock screen shows it: big, the hours and minutes only */
+.clock-time {
+  font-size: 26px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+
+.clock-date {
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+
+/* phones: a smaller clock, only the time */
+@media (max-width: 600px) {
+  .clock-time {
+    font-size: 16px;
+  }
+  .clock-date {
+    display: none;
+  }
+}

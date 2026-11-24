@@ -1,0 +1,380 @@
+/* The panel over the map (Panel.tsx). What is inside it is styled next to it:
+   LinePicker.css, LineOverview.css, Strip.css, JourneyPlanner.css. The sizes, the spaces and
+   the colours come from the set in styles/theme.css. */
+
+.panel {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  /* its sizes are of the whole panel, padding and edge included: the highest it goes keeps it
+     on the screen even when that is short, as a phone held sideways */
+  box-sizing: border-box;
+  width: 354px;
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  padding: var(--gap-section);
+  border: 1px solid var(--glass-edge);
+  border-radius: 16px;
+  background: var(--panel);
+  backdrop-filter: var(--glass);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  color: var(--ink);
+  font:
+    var(--text) / 1.45 system-ui,
+    sans-serif;
+  /* it comes in just after the loading screen starts to fade; `backwards` keeps it out of
+     sight until then */
+  animation: panel-in 450ms 150ms var(--ease) backwards;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+/* a phone's sheet comes up from under the edge of the screen */
+@keyframes panel-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/* Between the top row and the foot, which always stay where they are. When there is more than
+   fits, only the long part scrolls - the stops of a line, the ways found - and what you chose
+   stays in sight above it; the whole body scrolls only when even that does not fit. */
+.panel-body {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* the mode, which App keeps under a station or a vehicle opened over it (hidden then): its
+   parts stand in the body as if the wrapper were not there */
+.panel-body > .mode-content {
+  display: contents;
+}
+/* hidden it stays drawn, out of sight and taking no room (ModeContent.tsx); and
+   so does the journey under the lines */
+.panel-body > .mode-content[hidden],
+.panel-body > .mode-content > [hidden] {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; /* as wide as when it is seen, so nothing in it has to be laid out again */
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.panel-body > *,
+.panel-body > .mode-content > * {
+  flex-shrink: 0;
+}
+/* what comes into the panel - a station, a vehicle, a line, the way you are on, or the mode
+   again after its × - rises into place as the panel glides to its height (usePanelHeight.ts) */
+.panel .panel-body > *,
+.panel .panel-body > .mode-content > * {
+  animation: panel-swap 420ms var(--ease) backwards;
+}
+@keyframes panel-swap {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+/* while the height glides nothing in it scrolls, so no scroll bar flashes */
+.panel.gliding,
+.panel.gliding .panel-body {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel .panel-body > *,
+  .panel .panel-body > .mode-content > * {
+    animation: none;
+  }
+}
+/* the parts that give way, and inside them the lists that scroll */
+.panel-body > .mode-content > .overview,
+.panel-body > .mode-content > .journey,
+.panel-body > .mode-content > .chips,
+.panel-body > .station-card {
+  flex-shrink: 1;
+  min-height: 0;
+}
+/* while you plan a journey nothing in the body scrolls but the ways found, and the stations
+   offered as you type a name lie over everything under them - over the edge of the panel too -
+   rather than be cut off by it */
+.panel-body.for-journey {
+  overflow: visible;
+}
+.scroll-list {
+  flex-shrink: 1;
+  min-height: 60px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* the handle of the sheet, for phones only */
+.grab {
+  display: none;
+  flex: none;
+  width: 100%;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: grab;
+  touch-action: none; /* the drag is ours, not the page's */
+}
+.grab::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 9px auto;
+  border-radius: 2px;
+  background: var(--edge);
+  transition: background var(--answer);
+}
+@media (hover: hover) {
+  .grab:hover::before {
+    background: var(--ink-faint);
+  }
+}
+
+/* the title row */
+.panel-top {
+  margin-bottom: var(--gap-wide);
+  /* back after a × it rises in as the rest does; the panel glides to the height (usePanelHeight.ts) */
+  animation: panel-swap 420ms var(--ease) backwards;
+}
+/* away while one thing fills the panel */
+.panel-top.away {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel-top {
+    animation: none;
+  }
+}
+/* Lines / Journey */
+/* two halves of one control, the thumb sliding under the chosen one */
+.modes {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--raised);
+}
+.modes::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  border-radius: 7px;
+  background: var(--lifted);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition:
+    translate 380ms var(--settle),
+    opacity 200ms ease;
+}
+.modes[data-on="1"]::before {
+  translate: 100% 0;
+}
+.mode {
+  position: relative; /* over the thumb */
+  padding: var(--gap-tight) var(--gap-section);
+  border: none;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer);
+}
+@media (hover: hover) {
+  .mode:hover {
+    color: var(--ink);
+  }
+}
+.mode.on {
+  color: #ffffff;
+}
+.info {
+  margin: var(--gap) 0 0;
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}
+
+/* phones: the panel is a sheet along the bottom of the map, as tall as you pull it;
+   --panel-height is the share of the screen it stands at, and Panel.tsx sets it. Everything you press also
+   grows here, because a finger is not a cursor. */
+@media (max-width: 600px) {
+  /* as tall as what is in it, up to the height it was pulled to (--panel-height, a share of
+     the screen the keyboard leaves - useKeyboard.ts); it glides between them (usePanelHeight.ts) */
+  .panel {
+    top: auto;
+    bottom: var(--keyboard, 0px); /* on the keyboard, when there is one (useKeyboard.ts) */
+    left: 0;
+    right: 0;
+    width: auto;
+    max-height: calc(var(--panel-height, 50) * var(--screen-1, 1dvh));
+    padding: 0 var(--gap-wide);
+    border-width: 1px 0 0;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
+    animation-name: panel-up;
+    /* a finger held on it is not a selection of its text */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .panel input {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  /* pulled all the way up it fills the screen, as when a name is typed and the keyboard
+     covers the bottom half; down at the edge it shows its top only, or only its handle; and
+     under a finger it is exactly where the finger has it */
+  .panel[data-height="full"],
+  .panel.held {
+    height: calc(var(--panel-height) * var(--screen-1, 1dvh));
+  }
+  /* Down at the edge it shows whole things, never a row cut in half: the modes only (or, with
+     something open, the top of it, fading out); put away, its handle only. What is under them
+     is still there, scrolled as it was, and comes back as the sheet is pulled up. */
+  .panel[data-height="peek"]:not(.held) .panel-top:not(.away) ~ .panel-body,
+  .panel[data-height="away"]:not(.held) .panel-body,
+  .panel[data-height="away"]:not(.held) .panel-top {
+    flex: 0 0 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .panel[data-height="peek"]:not(.held):has(.panel-top.away) {
+    height: calc(var(--panel-height) * var(--screen-1, 1dvh));
+  }
+  .panel[data-height="peek"]:not(.held) .panel-top.away ~ .panel-body {
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+  }
+  .panel-body,
+  .panel-top {
+    transition: opacity 250ms ease;
+  }
+  /* the whole sheet scrolls as one, as a phone's sheets do: no list scrolls inside another */
+  .panel-body,
+  .panel-body.for-journey {
+    flex-grow: 1; /* to the bottom of a sheet pulled up: what a field offers drops into it */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .panel .panel-body > *,
+  .panel .panel-body > .mode-content > *,
+  .panel .scroll-list {
+    flex-shrink: 0;
+  }
+  .panel .scroll-list {
+    min-height: auto;
+    overflow: visible;
+  }
+  /* what is open fills the sheet itself, as a phone's sheets show it: the sheet is its card,
+     so it is not drawn as a card inside one */
+  .panel .station-card,
+  .panel .overview {
+    margin: 0;
+    padding: var(--gap-tight) var(--gap-tight) 0;
+    background: none;
+  }
+  .grab {
+    display: block;
+    height: 28px;
+  }
+  .grab::before {
+    margin: 12px auto;
+  }
+  .panel-top {
+    margin-bottom: var(--gap);
+  }
+  .panel-body {
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  }
+
+  /* A finger is not a cursor: everything pressed is at least as big as a fingertip, and all
+     the controls of one kind are the same height. The .panel before each rule makes it win
+     over the sizes the parts give themselves in their own files, which come after this one. */
+  .panel .mode {
+    padding: 10px var(--gap-section);
+  }
+  .panel .segmented button,
+  .panel .when-mode button {
+    min-height: 36px;
+    font-size: var(--text);
+  }
+  .panel .field {
+    min-height: 46px;
+  }
+  .panel .field-matches button {
+    padding: var(--gap-wide) var(--gap);
+    font-size: var(--text);
+  }
+  /* A phone zooms the whole page in when you put the cursor in a field whose text is smaller
+     than sixteen pixels, and then you are left looking at half the panel. The other way to
+     stop it is to forbid zooming altogether, which takes the pinch away from people who need
+     it, so the fields are simply given the size the phone is waiting for. */
+  .panel .field-input,
+  .panel .when-day,
+  .panel .when-clock input {
+    font-size: 16px;
+  }
+  .panel .when-day,
+  .panel .when-clock {
+    box-sizing: border-box;
+    height: 40px;
+  }
+  .panel .search {
+    height: 46px;
+    font-size: var(--text-strong);
+  }
+  .panel .when-clock button {
+    width: 40px;
+  }
+  .panel .ends .swap {
+    width: 40px;
+    height: 40px;
+  }
+  .panel .field-clear {
+    width: 32px;
+    height: 32px;
+  }
+  .panel .chip.ride-line {
+    height: 40px;
+  }
+  .panel .strip {
+    --row: 40px; /* Strip.css places the line through the circles from it */
+  }
+  .panel .station-close {
+    width: 32px;
+    height: 32px;
+  }
+}

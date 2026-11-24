@@ -1,0 +1,17 @@
+# installed and built
+node_modules/
+dist/
+*.log
+
+# your own settings: the key of the report form (frontend/.env.local), the editor
+*.local
+.vscode/
+.idea/
+.DS_Store
+
+# large or generated data, see docs/DATA.md
+data/osm/
+data/gtfs/
+data/shapes/
+data/.pfaedle/
+data/.update/

@@ -1,0 +1,196 @@
+/* The chosen line in the panel (ui/lines/LineOverview.tsx). */
+
+.overview {
+  display: flex;
+  flex-direction: column;
+  animation: overview-in 380ms var(--ease);
+  margin: var(--gap-tight) 0 var(--gap);
+  padding: var(--gap-wide);
+  border-radius: var(--radius);
+  background: var(--raised);
+}
+/* when the panel is short only the stops give way and scroll; the rest keeps its height */
+.overview > * {
+  flex-shrink: 0;
+}
+.overview > .scroll-list {
+  flex-shrink: 1;
+}
+/* the number as the journey cards draw it (.ride-line in styles/page.css), a little bigger, and
+   where the line runs between */
+.overview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.overview-line {
+  min-width: 34px;
+  padding: 3px 9px;
+  font-size: var(--text-strong);
+  font-weight: 700;
+}
+/* a long one goes on to a second line, the two about as long as each other, rather than be cut */
+.overview-ends {
+  min-width: 0;
+  font-size: var(--text-strong);
+  font-weight: 650;
+  line-height: 1.25;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* whether it runs, how many are out, how often, from when to when: one line in the size of the
+   card's text, the parts kept apart by a dot */
+.overview-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin-top: var(--gap);
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+}
+.overview-now .running,
+.overview-now .idle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 650;
+}
+.overview-now .running {
+  color: var(--live);
+}
+.overview-service {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.overview-part::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--ink-faint);
+}
+
+/* the direction: the segmented control of the panel (styles/page.css), with as many parts as the
+   line has directions */
+.segmented.directions {
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  margin-top: var(--gap-wide);
+}
+.segmented.directions::before {
+  width: calc((100% - 4px) / var(--count));
+  translate: calc(var(--on, 0) * 100%) 0;
+}
+/* the same with a long end: two lines, not cut */
+.segmented.directions button {
+  line-height: 1.2;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* when it leaves: a card of its own, the first time big, as a journey card says it */
+.departures {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--gap-wide);
+  padding: var(--gap) var(--gap-wide);
+  border-radius: 12px;
+  background: var(--lifted);
+}
+.departures {
+  animation: departures-in 360ms var(--ease);
+}
+.departures > * {
+  animation: departures-line 420ms var(--ease) both;
+}
+.departures > :nth-child(2) {
+  animation-delay: 60ms;
+}
+@keyframes departures-in {
+  from {
+    transform: scale(0.98);
+  }
+}
+@keyframes departures-line {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .departures,
+  .departures > * {
+    animation: none;
+  }
+}
+.departures-from {
+  overflow: hidden;
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.departures-times {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  font-variant-numeric: tabular-nums;
+}
+.departures-first {
+  font-size: var(--text-strong);
+  font-weight: 650;
+}
+.departures-later {
+  color: var(--ink-dim);
+  font-size: var(--text);
+  font-weight: 500;
+}
+
+/* where some trips start or end other than at the ends of the line: a small table */
+.other-ends {
+  margin-top: var(--gap-wide);
+  padding: var(--gap) var(--gap-wide);
+  border-radius: var(--radius);
+  background: var(--raised);
+  font-size: var(--text-meta);
+}
+.other-ends-title {
+  margin-bottom: 4px;
+  color: var(--ink-faint);
+}
+.other-ends dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px var(--gap-wide);
+  margin: 0;
+}
+.other-ends dt {
+  color: var(--ink-dim);
+}
+.other-ends dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+/* a line opens over the whole panel, rising into place */
+@keyframes overview-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overview {
+    animation: none;
+  }
+}
+/* its × at the end of the title */
+.overview-head .station-close {
+  margin-left: auto;
+}

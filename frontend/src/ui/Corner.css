@@ -1,0 +1,163 @@
+/* The corners of the map (ui/Corner.tsx): the clock and, under it, the live status at the top
+   right; the settings button at the bottom right. */
+
+.corner {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  font-family: system-ui, sans-serif;
+}
+
+/* the clock: a pane of glass as a widget is */
+.widget {
+  min-width: 140px;
+  padding: 10px 14px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: var(--panel);
+  backdrop-filter: var(--glass);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  animation: widget-in 500ms var(--ease) backwards;
+}
+@keyframes widget-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+/* the live status: smaller, a glass capsule of its own under it - good to know, not more */
+.widget-live {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+  background: var(--panel);
+  backdrop-filter: var(--glass);
+  color: var(--live);
+  font:
+    600 11px system-ui,
+    sans-serif;
+  white-space: nowrap;
+  cursor: default;
+  animation: widget-in 400ms 150ms var(--ease) backwards;
+}
+/* no signal: a grey dot where the waves are */
+.live-off-dot {
+  width: 7px;
+  height: 7px;
+  margin: 2px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.widget-live .live-waves {
+  width: 11px;
+  height: 11px;
+}
+.widget-live.off {
+  color: var(--ink-faint);
+}
+
+/* the gear: a round pane of the same glass in the bottom right corner, above the credits of
+   the map */
+.gear {
+  position: fixed;
+  right: 16px;
+  bottom: 40px;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 50%;
+  background: var(--panel);
+  backdrop-filter: var(--glass);
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition:
+    background var(--answer),
+    color var(--answer),
+    rotate 500ms var(--settle),
+    scale 260ms var(--spring);
+}
+.gear:active {
+  scale: 0.9;
+  rotate: 60deg;
+}
+@media (hover: hover) {
+  .gear:hover {
+    color: var(--ink);
+  }
+}
+
+/* phones: smaller; the panel lies along the bottom, so the gear goes to the top left */
+@media (max-width: 600px) {
+  /* under the sheet, when it is pulled up over them */
+  .corner {
+    top: max(8px, env(safe-area-inset-top));
+    right: 8px;
+    z-index: 9;
+  }
+  .widget {
+    min-width: 0;
+    padding: 5px 10px;
+    border-radius: 14px;
+  }
+  /* the live status: a round pane with its signal only, as big as the gear; a tap opens it
+     to the left with what it says, and it folds again by itself (Corner.tsx) */
+  .widget-live {
+    box-sizing: border-box;
+    min-width: 32px;
+    height: 32px;
+    gap: 0;
+    padding: 0 10px;
+    cursor: pointer;
+    transition: gap 300ms var(--ease);
+  }
+  .widget-live .live-waves {
+    width: 12px;
+    height: 12px;
+  }
+  .widget-live-text {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      max-width 380ms var(--ease),
+      opacity 200ms ease;
+  }
+  .widget-live.open {
+    gap: 5px;
+  }
+  .widget-live.open .widget-live-text {
+    max-width: 180px;
+    opacity: 1;
+    transition:
+      max-width 380ms var(--ease),
+      opacity 300ms 80ms ease;
+  }
+  .gear {
+    z-index: 9;
+    top: max(8px, env(safe-area-inset-top));
+    right: auto;
+    bottom: auto;
+    left: 8px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .widget,
+  .widget-live {
+    animation: none;
+  }
+}

@@ -1,0 +1,71 @@
+/* The look of the whole app in one place: the type, the spaces, the colours and how things
+   move. Everything else is built from these, so that nothing is sized, coloured or animated by
+   feel. The page itself is styled in page.css; a component is styled next to it. */
+
+:root {
+  /* four sizes of type and no more */
+  --text-meta: 11px; /* what stands beside the content: times, delays, notes */
+  --text: 13px; /* everything you read */
+  --text-strong: 15px; /* the name of what the panel is showing */
+  --text-title: 20px; /* the number of the line */
+
+  /* a rhythm of four: inside a thing, between things, between groups of them */
+  --gap-tight: 4px;
+  --gap: 8px;
+  --gap-wide: 12px;
+  --gap-section: 16px;
+  --radius: 8px;
+  --radius-small: 6px;
+  --pad-control: 6px var(--gap); /* the inside of a field or a button */
+
+  /* the dark the panels are made of: frosted glass over the map, the map showing through
+     blurred, and everything inside it a lighter layer of the same glass */
+  --ink: #ececf1; /* what you read */
+  --ink-dim: #a8a8b4; /* what you read second */
+  --ink-faint: #85858f; /* what is there only if you look for it - still 4.5 : 1 on the glass */
+  --panel: rgba(20, 20, 26, 0.46);
+  --glass: blur(30px) saturate(1.8); /* what the panel does to the map under it */
+  --glass-edge: rgba(255, 255, 255, 0.12); /* the rim of a pane of glass */
+  --raised: rgba(255, 255, 255, 0.045); /* a block inside a panel */
+  --control: rgba(255, 255, 255, 0.08); /* something to press */
+  --lifted: rgba(255, 255, 255, 0.13); /* something pressed, or under the cursor */
+  --edge: rgba(255, 255, 255, 0.12);
+  /* where glass would be too thin to read: a menu over other things */
+  --solid: rgba(32, 32, 40, 0.92);
+  --scrollbar: #3a3a46;
+
+  /* what a colour says, the same everywhere */
+  --live: #69db7c; /* it is running, it is on its way, on time */
+  --late: #ff9f0a; /* it runs late */
+  --late-tint: rgba(255, 159, 10, 0.16); /* the tag a delay is written on */
+  --brand: #ff5a5f; /* ŠalinaGO: the red of a Brno tram */
+  --error: #ff8a8a; /* something did not work */
+  --error-ground: #5c1a1a;
+  --focus: rgba(255, 255, 255, 0.75); /* the ring round what the keyboard is on */
+
+  /* how things move: four curves and no more
+     --ease     arrives and settles, as a phone's sheets and cards do (most things)
+     --ease-in-out  starts and stops softly: something that travels on its own
+     --settle   a little past where it goes and back: a thumb sliding, a pane opening
+     --spring   gives way under the finger and springs back: anything pressed */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --settle: cubic-bezier(0.3, 0.7, 0.2, 1.15);
+  --spring: cubic-bezier(0.3, 0.7, 0.3, 1.5);
+  /* how long anything takes to answer the cursor */
+  --answer: 140ms ease;
+}
+
+/* a phone is held further from the eye than its size suggests: the smallest type a little
+   bigger there */
+@media (max-width: 600px) {
+  :root {
+    --text-meta: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --answer: 0s;
+  }
+}

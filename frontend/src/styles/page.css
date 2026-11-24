@@ -1,0 +1,272 @@
+/* The page as a whole: the page itself, the map and its credits, and the few parts every
+   panel shares - how anything pressed answers, where the keyboard is, the segmented control,
+   the number of a line, the waves of a live time. The colours, sizes and curves are in
+   theme.css; a component is styled next to it (e.g. LineOverview.css). */
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: #000;
+}
+/* an app, not a page: the page itself never bounces or scrolls, and a tap does not flash */
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.map {
+  width: 100vw;
+  height: 100dvh; /* what the browser's bars leave of the screen, as they come and go */
+}
+
+/* shown when the data could not be loaded */
+.app-error {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-wide);
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 10px 10px 10px 16px;
+  border-radius: 12px;
+  background: var(--error-ground);
+  color: #ffffff;
+  font:
+    14px system-ui,
+    sans-serif;
+  transform: translateX(-50%);
+}
+.app-error button {
+  flex: none;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* thin dark scroll bars instead of the bright default ones (the panel, the line numbers) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--scrollbar) padding-box;
+}
+
+/* phones: the sheet lies over the bottom of the map, so the data credits go to the top left,
+   folded into the (i) under the settings button (map/createMap.ts folds them) */
+@media (max-width: 600px) {
+  .maplibregl-ctrl-bottom-right {
+    top: calc(max(8px, env(safe-area-inset-top)) + 36px);
+    right: auto;
+    bottom: auto;
+    left: 0;
+  }
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+    margin: 0 0 0 8px;
+  }
+  /* opened, the credits take a few short lines inside the screen, under the gear, and leave
+     the clock its corner */
+  .maplibregl-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib.maplibregl-compact-show {
+    max-width: calc(100vw - 16px - 110px);
+    padding: 4px 28px 4px 10px;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+}
+
+/* the map credits, dark like the rest: the line of text, and the (i) it folds into */
+.maplibregl-ctrl.maplibregl-ctrl-attrib,
+.maplibregl-ctrl.maplibregl-ctrl-attrib.maplibregl-compact {
+  border-radius: 12px;
+  background: var(--panel);
+  backdrop-filter: var(--glass);
+  color: var(--ink-faint);
+  font-size: 11px;
+}
+/* the (i) stands right under the settings button (ui/Corner.css: 16px from the edge, 40px
+   wide), its middle under the middle of it */
+@media (min-width: 601px) {
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+    margin-right: 24px;
+  }
+}
+.maplibregl-ctrl-attrib a {
+  color: var(--ink-dim);
+}
+.maplibregl-ctrl-attrib .maplibregl-ctrl-attrib-button {
+  filter: invert(1) opacity(0.6);
+}
+
+/* where the keyboard is: a ring round what it is on - never shown for a click or a tap, which
+   :focus-visible leaves out */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+/* the map itself takes the keyboard too (its arrows move it): a ring round the whole screen
+   would say nothing the moving map does not */
+.maplibregl-canvas:focus-visible {
+  outline: none;
+}
+
+/* Everything you press gives way under the finger, a little, and springs back: the way the
+   controls of an Apple device answer. The rest of each one's transitions are its own. */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+body
+  :is(
+    .mode,
+    .chip,
+    .when-mode button,
+    .when-clock button,
+    .swap,
+    .field-clear,
+    .search,
+    .field-matches button,
+    .segmented button
+  ) {
+  transition-property: background, border-color, color, opacity, scale, transform;
+  transition-duration: 140ms, 140ms, 140ms, 140ms, 260ms, 250ms;
+  transition-timing-function: ease, ease, ease, ease, var(--spring), ease;
+}
+body
+  :is(
+    .mode,
+    .chip,
+    .when-mode button,
+    .when-clock button,
+    .swap,
+    .field-clear,
+    .search,
+    .field-matches button,
+    .segmented button
+  ):active:not(:disabled) {
+  scale: 0.95;
+}
+body .trip {
+  transition: scale 260ms var(--spring);
+}
+body .trip:active {
+  scale: 0.985;
+}
+@media (prefers-reduced-motion: reduce) {
+  body
+    :is(
+      .mode,
+      .chip,
+      .when-mode button,
+      .when-clock button,
+      .swap,
+      .field-clear,
+      .search,
+      .field-matches button,
+      .trip
+    ):active {
+    scale: none;
+  }
+}
+
+/* two choices of one control, the thumb sliding under the chosen one: the language, leaving
+   at or arriving by */
+.segmented {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-small);
+  background: var(--raised);
+}
+.segmented::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  border-radius: 4px;
+  background: var(--lifted);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: translate 380ms var(--settle);
+}
+.segmented[data-on="1"]::before {
+  translate: 100% 0;
+}
+.segmented button {
+  position: relative; /* over the thumb */
+  padding: 6px var(--gap);
+  border: none;
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  cursor: pointer;
+}
+.segmented button[aria-pressed="true"] {
+  color: var(--ink);
+}
+
+/* the number of a line in its colour, the way Apple Maps draws it: a rounded square for a
+   tram, a capsule for a bus or a trolleybus */
+.ride-line {
+  flex: none;
+  min-width: 26px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  color: var(--line-ink, #101016);
+  font-size: var(--text);
+  font-weight: 650;
+  letter-spacing: -0.2px;
+  text-align: center;
+}
+.ride-line.bus,
+.ride-line.trolleybus {
+  border-radius: 999px;
+}
+
+/* the waves of a live time: the arcs light up one after the other */
+.live-waves .wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  animation: live-wave 1.8s ease-in-out infinite;
+}
+.live-waves .wave.two {
+  animation-delay: 0.3s;
+}
+@keyframes live-wave {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-waves .wave {
+    animation: none;
+  }
+}

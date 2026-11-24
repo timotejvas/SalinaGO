@@ -1,0 +1,91 @@
+/* The labels of live vehicles on the map (map/transit/vehicleLabels.ts). */
+
+/* the label itself can be clicked - it opens its line - but the room around it, where the dart
+   turns, lets the map be dragged */
+.vehicle-label {
+  pointer-events: none;
+}
+.vehicle-label-pill {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* its size and how much of it shows: what all labels share at this zoom, set on the map
+   (--label-scale, --label-seen), times how far this one has grown in, arriving (--pop) */
+.vehicle-label-inner {
+  position: relative;
+  opacity: calc(var(--label-seen, 1) * min(1, var(--pop, 1)));
+  transform: scale(calc(var(--label-scale, 1) * var(--pop, 1)));
+  will-change: transform;
+}
+.vehicle-label-pill {
+  position: relative; /* over its dart */
+  box-sizing: border-box;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 6px;
+  border-radius: 5px; /* a tram: a rounded square */
+  background: var(--line-color);
+  /* a hairline of dark round it and a soft shadow under it: it stands on the map */
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  color: var(--line-ink);
+  font:
+    650 11px/19px system-ui,
+    sans-serif; /* keep in sync with LABEL_FONT */
+  letter-spacing: -0.2px;
+  text-align: center;
+  white-space: nowrap;
+}
+.vehicle-label-dart {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11px;
+  height: 9px;
+  margin: -4.5px 0 0 -5.5px;
+}
+.vehicle-label-dart path {
+  fill: var(--line-color);
+}
+.vehicle-label-dart svg {
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6));
+}
+/* a bus or a trolleybus: a capsule */
+.vehicle-label-pill.bus,
+.vehicle-label-pill.trolleybus {
+  border-radius: 10px;
+}
+
+/* the ping of a vehicle at a stop: a copy of the label behind it, growing out and fading, again
+   and again; the browser animates it on its own, so it stays smooth however busy the page is */
+.vehicle-label-ring {
+  position: absolute;
+  inset: -1.5px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--line-color);
+  opacity: 0;
+  pointer-events: none;
+}
+.vehicle-label-pill.at-stop > .vehicle-label-ring {
+  animation: vehicle-ping 1.8s var(--ease) infinite;
+}
+@keyframes vehicle-ping {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  12% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2, 2.6);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vehicle-label-pill.at-stop > .vehicle-label-ring {
+    animation: none;
+  }
+}
