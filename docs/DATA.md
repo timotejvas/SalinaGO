@@ -1,6 +1,6 @@
 # Data sources
 
-<sub>← [Back to the README](../README.md) · [How it works](./ARCHITECTURE.md) · ŠalinaGO 1.0.2</sub>
+<sub>← [Back to the README](../README.md) · [How it works](./ARCHITECTURE.md) · ŠalinaGO 1.0.3</sub>
 
 Every shape and number on the map comes from the sources below: the timetable, the routes and
 the paths to walk along from files prepared in advance, the vehicles on the way from a live

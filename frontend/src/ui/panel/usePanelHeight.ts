@@ -30,6 +30,18 @@ export function usePanelHeight(panelRef: RefObject<HTMLDivElement | null>) {
         height = panel.getBoundingClientRect().height;
         return;
       }
+      // moved by a finger on a field (Panel.tsx), which slides it into its place itself
+      if (panel.dataset.glide === "none") {
+        delete panel.dataset.glide;
+        if (glide) {
+          glide.onfinish = glide.oncancel = null;
+          glide.cancel();
+          glide = null;
+          panel.classList.remove("gliding");
+        }
+        height = panel.getBoundingClientRect().height;
+        return;
+      }
       if (glide) return; // its own frames; where it ends is looked at when it has
       const to = panel.getBoundingClientRect().height;
       const from = height;

@@ -10,13 +10,15 @@ import {
   useState,
   type CSSProperties,
   type FocusEvent,
+  type PointerEvent,
   type ReactNode,
   type RefObject,
 } from "react";
+import { flushSync } from "react-dom";
 import type { TransitData } from "../../logic/timetable/loadData";
 import { formatDate, type Now } from "../../logic/timetable/clock";
 import { isTimetableCurrent } from "../../logic/timetable/departures";
-import { isPhone } from "../../screen";
+import { EASE, isPhone, lessMotion } from "../../screen";
 import { useWords } from "../language";
 import { HEIGHT, MOVE_EVENT, next, type Height } from "./control";
 import { usePanelDrag } from "./usePanelDrag";
@@ -83,9 +85,30 @@ export default function Panel({
   }, [mode, modesHidden]);
 
   // a name being typed: all the way up, so that the field and what it offers stay above the
-  // keyboard
+  // keyboard (a keyboard of a computer, or a field focused by the app: a finger is below)
   function focused(event: FocusEvent) {
     if (isPhone() && event.target instanceof HTMLInputElement) setHeight("full");
+  }
+
+  // A finger on a field: all the way up at once - before the field takes the focus, which it
+  // does as the finger lifts. When the keyboard comes, the field is already high on the screen,
+  // and the phone has no reason to move the page to show it: the page moving while the panel
+  // rose was the jump. It still looks as if it glided: drawn where it was, it slides into its
+  // place, without its layout changing on the way.
+  function touchedField(event: PointerEvent<HTMLDivElement>) {
+    const panel = ref.current;
+    const target = event.target as Element;
+    if (!panel || !isPhone() || event.pointerType !== "touch" || height === "full") return;
+    if (!target.closest("input, textarea")) return;
+    const before = panel.getBoundingClientRect().top;
+    panel.dataset.glide = "none"; // its own glide stays out of it (usePanelHeight.ts)
+    flushSync(() => setHeight("full"));
+    const after = panel.getBoundingClientRect().top;
+    if (lessMotion() || Math.abs(before - after) < 2) return;
+    panel.animate([{ transform: `translateY(${before - after}px)` }, { transform: "none" }], {
+      duration: 380,
+      easing: EASE,
+    });
   }
 
   return (
@@ -95,6 +118,7 @@ export default function Panel({
       style={{ "--panel-height": HEIGHT[height] } as CSSProperties}
       data-height={height}
       onFocus={focused}
+      onPointerDown={touchedField}
     >
       {/* only on a phone, where the panel is a sheet along the bottom */}
       <button

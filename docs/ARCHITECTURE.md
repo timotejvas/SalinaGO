@@ -1,6 +1,6 @@
 # How ŠalinaGO works
 
-<sub>← [Back to the README](../README.md) · [Data, sources and licences](./DATA.md) · ŠalinaGO 1.0.2</sub>
+<sub>← [Back to the README](../README.md) · [Data, sources and licences](./DATA.md) · ŠalinaGO 1.0.3</sub>
 
 The engineering side of the app: how every feature works underneath, how the code is laid out
 and how its parts talk to each other, and what was fixed on the way to 1.0.
@@ -481,6 +481,16 @@ Every entry: **Problem** → **Cause** → **Solution**.
 | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | On an iPhone, with the keyboard up, the fields of the panel were above the top of the screen. | An iPhone moves what is seen down the page rather than covering its bottom, so nothing looked covered, and the panel was sized by the whole screen. | The panel is sized by what is seen whenever it is shorter than the page - however the phone makes room for the keyboard. |
 | On a phone the (i) of the map credits did not line up with the gear above it.                 | It was smaller (24 px), without a rim, its middle 4 px aside.                                                                                       | A round pane like the gear: 32 px, the same glass and rim, right under it.                                               |
+
+</details>
+
+<details>
+<summary><b>🔧 Version 1.0.3</b></summary>
+
+| Problem                                                                                                 | Cause                                                                                                                                                                 | Solution                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tapping a field on a phone, the panel rose and the page moved at the same time - not one smooth motion. | The panel went up only once the field had the focus; by then the phone had seen the field low on the screen, where the keyboard comes, and moved the page to show it. | The panel is laid out all the way up the moment a finger touches a field, before the focus; it is drawn where it was and slides up (a transform, so the layout does not change on the way), and the phone has nothing to move. |
+| The top of the panel moved again when the keyboard came.                                                | All the way up was 92 % of what is seen, and the keyboard takes part of it.                                                                                           | All the way up, the top stands at one place under the phone's top bar; the keyboard moves only the bottom.                                                                                                                     |
 
 </details>
 

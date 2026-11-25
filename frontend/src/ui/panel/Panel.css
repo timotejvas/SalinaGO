@@ -229,6 +229,8 @@
   /* as tall as what is in it, up to the height it was pulled to (--panel-height, a share of
      the screen the keyboard leaves - useKeyboard.ts); it glides between them (usePanelHeight.ts) */
   .panel {
+    /* what is left above it, all the way up: the phone's own top bar, and a little more */
+    --full-gap: max(56px, calc(env(safe-area-inset-top, 0px) + 12px));
     top: auto;
     bottom: var(--keyboard, 0px); /* on the keyboard, when there is one (useKeyboard.ts) */
     left: 0;
@@ -252,9 +254,15 @@
   /* pulled all the way up it fills the screen, as when a name is typed and the keyboard
      covers the bottom half; down at the edge it shows its top only, or only its handle; and
      under a finger it is exactly where the finger has it */
-  .panel[data-height="full"],
   .panel.held {
     height: calc(var(--panel-height) * var(--screen-1, 1dvh));
+  }
+  /* all the way up its top stands at one place under the phone's own top bar, keyboard or not:
+     the keyboard moves its bottom only, never its top - as a share of what is seen, the top
+     would move as the keyboard took its room */
+  .panel[data-height="full"]:not(.held) {
+    height: calc(var(--screen-1, 1dvh) * 100 - var(--full-gap));
+    max-height: none; /* the share of the screen does not hold it down here */
   }
   /* Down at the edge it shows whole things, never a row cut in half: the modes only (or, with
      something open, the top of it, fading out); put away, its handle only. What is under them
