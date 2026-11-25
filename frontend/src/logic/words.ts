@@ -65,6 +65,7 @@ const EN = {
   arrived: "You're there",
   walkRest: (minutes: number) => `The rest on foot · ${minutes} min`,
   changeTo: (line: string) => `Change to ${line}`,
+  change: "Change to", // before the line, drawn in its colour
   fromStop: (stop: string) => `at ${stop}`,
   liveNow: "Live",
   wholeLine: (line: string) => `Line ${line}`,
@@ -189,6 +190,7 @@ const CS: Words = {
   arrived: "Jste v cíli",
   walkRest: (minutes) => `Zbytek pěšky · ${minutes} min`,
   changeTo: (line) => `Přestup na ${line}`,
+  change: "Přestup na",
   fromStop: (stop) => `ze zastávky ${stop}`,
   liveNow: "Živě",
   wholeLine: (line) => `Linka ${line}`,

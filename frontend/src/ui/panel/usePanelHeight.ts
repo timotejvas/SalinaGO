@@ -1,13 +1,16 @@
 // What is in the panel changes at once - a station opened, closed, a line, the way you are on -
 // but its height glides from the old to the new, so that the panel grows and shrinks rather
 // than jumps. On a phone also when it is let go or asked to a height - not while a finger moves
-// it, which it follows as it is. Not at all for those who want less motion.
+// it, which it follows as it is - and there it springs, settling with a little bounce. Not at
+// all for those who want less motion.
 
 import { useEffect, type RefObject } from "react";
-import { EASE, lessMotion } from "../../screen";
+import { EASE, isPhone, lessMotion, SPRING, SPRING_MS } from "../../screen";
 import { keyboardJustMoved } from "./useKeyboard";
 
 const GLIDE = { duration: 380, easing: EASE };
+// on a phone, the sheet springs to its height instead, this much longer than it glides
+const SPRING_STRETCH = SPRING_MS / GLIDE.duration;
 
 export function usePanelHeight(panelRef: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
@@ -49,9 +52,13 @@ export function usePanelHeight(panelRef: RefObject<HTMLDivElement | null>) {
       delete panel.dataset.glide;
       // (its sizes include its padding and edge, as measured; and its highest, max-height,
       // would hold it down when it shrinks)
+      // on a phone it springs: a little past the height and back, as a phone's own sheets
+      const spring = isPhone() ? SPRING : null;
       glide = panel.animate(
         { height: [`${from}px`, `${to}px`], maxHeight: ["none", "none"] },
-        { ...GLIDE, duration },
+        spring
+          ? { duration: Math.round(duration * SPRING_STRETCH), easing: spring }
+          : { ...GLIDE, duration },
       );
       glide.onfinish = glide.oncancel = () => {
         glide = null;

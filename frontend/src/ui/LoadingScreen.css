@@ -121,12 +121,16 @@
     filter: blur(3px);
   }
 }
-/* who made it, at the foot of the screen */
+/* the version and, under it, who made it, at the foot of the screen */
 .loading-by {
   position: absolute;
   bottom: calc(24px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   color: rgba(236, 236, 241, 0.3);
   font-size: 11px;
   letter-spacing: 0.4px;

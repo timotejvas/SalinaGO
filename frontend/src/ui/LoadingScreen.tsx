@@ -1,6 +1,7 @@
 // The ŠalinaGO screen shown while the map, the timetable and the live vehicles load: frosted
 // glass over the map as it comes up under it, and on it a line with stops that draws itself
-// again and again, the name, what it is waiting for, and who made it. It fades out when the app is ready (or loading failed, then the error message under it
+// again and again, the name and what it is waiting for; at its foot the version and who made
+// it. It fades out when the app is ready (or loading failed, then the error message under it
 // is visible).
 // When it is over in a moment it says what it is doing; when it takes longer than that, it
 // starts passing the time instead.
@@ -90,8 +91,12 @@ export default function LoadingScreen({ loading, steps }: Props) {
           {line < 0 ? text : lines[line % lines.length]}
         </div>
       </div>
+      {/* at the foot: which version, and under it who made it */}
       <div className="loading-by">
-        {w.madeBy} Timotej V. · {w.version} {VERSION}
+        <span>
+          {w.version} {VERSION}
+        </span>
+        <span>{w.madeBy} Timotej V.</span>
       </div>
     </div>
   );

@@ -347,6 +347,13 @@
   .panel .field {
     min-height: 46px;
   }
+  /* the list a field offers: on a phone it ends above the keyboard and scrolls inside
+     (PlaceField.tsx), and nothing under it shows through */
+  .panel .field-matches {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: rgb(32, 32, 40);
+  }
   .panel .field-matches button {
     padding: var(--gap-wide) var(--gap);
     font-size: var(--text);

@@ -50,7 +50,13 @@ export function usePanelDrag(
   useEffect(() => {
     const panel = panelRef.current;
     if (!panel) return;
-    let start: { y: number; top: number; head: boolean; handle: boolean } | null = null;
+    let start: {
+      y: number;
+      top: number;
+      head: boolean;
+      handle: boolean;
+      list: Element | null; // a list scrolling inside the panel, the finger on it
+    } | null = null;
     let drag: { grip: number; moves: { y: number; t: number }[] } | null = null;
 
     const begin = (event: TouchEvent) => {
@@ -63,6 +69,7 @@ export function usePanelDrag(
         top: panel.getBoundingClientRect().top,
         head: Boolean(target.closest(HEAD)),
         handle: Boolean(target.closest(".grab")),
+        list: target.closest(".field-matches"),
       };
       drag = null;
     };
@@ -73,7 +80,8 @@ export function usePanelDrag(
       const dy = y - start.y;
       if (!drag) {
         if (Math.abs(dy) < SLOP) return;
-        const atTop = (bodyRef.current?.scrollTop ?? 0) <= 0;
+        // at the top of what is in it - and of the list under the finger, scrolled inside
+        const atTop = (bodyRef.current?.scrollTop ?? 0) <= 0 && (start.list?.scrollTop ?? 0) <= 0;
         const own = start.head || (dy > 0 && atTop) || (dy < 0 && resting.current !== "full");
         if (!own) return void (start = null); // a scroll of what is in it
         drag = { grip: start.y - start.top, moves: [] };

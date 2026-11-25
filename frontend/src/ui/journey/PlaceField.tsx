@@ -4,13 +4,14 @@
 // logic/timetable/stations.ts finds the stations, logic/walk/addresses.ts the addresses; those
 // are downloaded only once something is typed (hooks/useWalking.ts).
 
-import { useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { searchStations, type MapStation } from "../../logic/timetable/stations";
 import { searchAddresses } from "../../logic/walk/addresses";
 import { isStation, type Place } from "../../logic/walk/places";
 import type { Kind } from "../../logic/timetable/lines";
 import { useWalking } from "../../hooks/useWalking";
 import { inkOn, KIND_COLORS } from "../../colors";
+import { isPhone } from "../../screen";
 import KindIcon from "./KindIcon";
 import { useWords } from "../language";
 import "./PlaceField.css";
@@ -18,6 +19,7 @@ import "./PlaceField.css";
 // ---------- settings ----------
 const MATCHES = 6; // how many matches are offered at once
 const STATIONS = 4; // of them at most this many stations, when addresses match too
+const ABOVE_KEYBOARD = 12; // px the list ends above the keyboard, on a phone
 // ------------------------------
 
 type Props = {
@@ -51,6 +53,28 @@ export default function PlaceField({
     matches.push(...addresses.slice(0, MATCHES - matches.length));
   }
   const offered = matches.filter((found) => found.id !== other?.id);
+
+  // On a phone the list ends a little above the keyboard, its rounded foot in sight, and what
+  // does not fit scrolls inside it - rather than run on under the keyboard, cut off by the edge
+  // of the panel. Measured again whenever the keyboard changes what is left of the screen.
+  const list = useRef<HTMLUListElement>(null);
+  const shown = offered.length > 0;
+  useLayoutEffect(() => {
+    const ul = list.current;
+    const view = window.visualViewport;
+    if (!shown || !ul || !view || !isPhone()) return;
+    const fit = () => {
+      const room = view.offsetTop + view.height - ul.getBoundingClientRect().top - ABOVE_KEYBOARD;
+      ul.style.maxHeight = `${Math.max(120, Math.round(room))}px`;
+    };
+    fit();
+    view.addEventListener("resize", fit);
+    view.addEventListener("scroll", fit);
+    return () => {
+      view.removeEventListener("resize", fit);
+      view.removeEventListener("scroll", fit);
+    };
+  }, [shown]);
 
   function pick(found: Place) {
     // a street is the start of an address: it is written into the field, and you go on with
@@ -104,7 +128,7 @@ export default function PlaceField({
       {offered.length > 0 && (
         // pressing a match does not take the focus from the field: after a street you go on
         // typing, and the list does not close and open again under your finger
-        <ul className="field-matches" onMouseDown={(event) => event.preventDefault()}>
+        <ul className="field-matches" ref={list} onMouseDown={(event) => event.preventDefault()}>
           {offered.map((found) => (
             <li key={found.id}>
               <button onClick={() => pick(found)}>

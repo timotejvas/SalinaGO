@@ -9,9 +9,9 @@ import type { TransitData } from "../timetable/loadData.ts";
 import type { Now } from "../timetable/clock.ts";
 import { secondsUntil } from "../timetable/departures.ts";
 import type { Vehicle } from "../live/vehicles.ts";
-import { alongStops } from "../live/track.ts";
+import { alongStops, metersBetween, type Point } from "../live/track.ts";
 import { arrivalOf, type Ride } from "./direct.ts";
-import { rideNow, type RideNow } from "./incoming.ts";
+import type { RideNow } from "./incoming.ts";
 
 // ---------- settings ----------
 // with no live vehicle, a ride is over this long after the timetable has you there
@@ -21,6 +21,7 @@ const OVER_S = 60;
 export const NEXT_STOPS = 3;
 const NEXT_S = 6 * 60;
 const NEAR_ROUTE_M = 150; // further than this from its route, a vehicle is not where it says
+const AT_STOP_M = 40; // this near the platform a vehicle is at the stop
 // ------------------------------
 
 // Whether the ride you are on is over: its vehicle has come to where you get off, or beyond;
@@ -52,14 +53,21 @@ export function nearingChange(
 }
 
 // Whether a vehicle has come to where you get off a ride, or beyond it: you change there, and
-// from then on it is the vehicle of your next ride that matters.
+// from then on it is the vehicle of your next ride that matters - or you are there.
+// Where it is is looked for along the whole ride, from the stop before you get on to the one
+// after you get off. Only around the stop you get off at, a vehicle still coming for you was
+// nearest to the stretch after it wherever the route bends back, and was taken for one that had
+// passed it: the way ended as you got to the stop where you change, or the moment it was found.
+// Not on that part of the route at all, it says nothing, and the timetable decides.
 export function reachedOff(data: TransitData, ride: Ride, vehicle: Vehicle, now: Now): boolean {
-  const off = {
-    ...ride,
-    at: ride.at + ride.stops,
-    departure: arrivalTime(ride),
-  };
-  return rideNow(data, off, vehicle, now).state !== "coming";
+  const positions = data.variants[ride.variant].positions;
+  const off = ride.at + ride.stops;
+  const point: Point = [vehicle.lon, vehicle.lat];
+  if (metersBetween(point, positions[off]) < AT_STOP_M) return true;
+  const from = Math.max(0, ride.at - 1);
+  const found = alongStops(point, positions.slice(from, off + 2));
+  if (!found || found.meters > NEAR_ROUTE_M) return secondsUntil(arrivalTime(ride), now) < -OVER_S;
+  return from + found.index >= off;
 }
 
 // How many stops a vehicle you are on still has to go to where you get off a ride: 0 when it

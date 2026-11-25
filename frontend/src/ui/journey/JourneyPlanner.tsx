@@ -50,7 +50,7 @@ type Props = {
 };
 
 const NO_LEGS: DrawnLeg[] = []; // nothing drawn, the same every time
-const THERE_MS = 60_000; // "You're there" stays this long (and the walk to the end), then closes
+const THERE_MS = 2500; // "You're there" stays this long - its tick drawn - and then it closes
 
 export default function JourneyPlanner({
   map,
@@ -91,14 +91,13 @@ export default function JourneyPlanner({
   // shows that way alone until you close it (×) or are there; the search stays under it.
   const riding = Boolean(ways.picked) && progress.onWay && closed !== ways.way;
 
-  // there: the way says so for a while - longer by the walk to an address at the end - and then
-  // closes by itself, back to the search
-  const walkLeft = ways.picked?.walkLast?.minutes ?? ways.picked?.walkAfter?.minutes ?? 0;
+  // there - off the last vehicle: the way says so a moment, and closes by itself, back to the
+  // search (the panel glides down to it)
   useEffect(() => {
     if (!riding || !progress.arrived) return;
-    const done = setTimeout(() => ways.forget(), THERE_MS + walkLeft * 60_000);
+    const done = setTimeout(() => ways.forget(), THERE_MS);
     return () => clearTimeout(done);
-  }, [riding, progress.arrived, walkLeft]);
+  }, [riding, progress.arrived]);
   useEffect(() => {
     onRiding(riding && active);
     return () => onRiding(false);

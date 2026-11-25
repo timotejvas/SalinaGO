@@ -1,10 +1,13 @@
 // On the way: the way you picked, alone, once its vehicle has picked you up - where it is, the
 // stops still to come, where you change - until you close it (×) or are there. The title says
 // where your vehicle is: at your stop, on the way, or at a change which line you change to and
-// when it comes; nearing a change, a line under it says how far the next one is.
+// when it comes; nearing a change, a card under it shows the next ride - its line in its colour,
+// the stop you get on at, and how soon its vehicle is there.
 // Where you are on the way is found by hooks/useJourneyProgress.ts.
 
+import type { CSSProperties } from "react";
 import type { TransitData } from "../../logic/timetable/loadData";
+import { inkOn, lineColor } from "../../colors";
 import { formatTime, type Now } from "../../logic/timetable/clock";
 import type { Vehicle } from "../../logic/live/vehicles";
 import type { Journey } from "../../logic/journey/plan";
@@ -96,14 +99,40 @@ export default function OnTheWay({
           ×
         </button>
       </div>
-      {/* nearing the change: the line you change to and how far its vehicle is */}
+      {/* nearing the change: a card of its own for the next ride - not one more line of the
+          title - with the line in its colour, where you get on, and when it is there */}
       {after ? (
-        <div className={`ride-next ${next ? "live" : ""}`}>
-          {next ? <LiveWaves /> : null}
-          {w.changeTo(after.line)} ·{" "}
-          {next?.seconds !== undefined
-            ? describeComing(next.seconds, w)
-            : formatTime(after.ride.departure.seconds)}
+        <div
+          className={`ride-change ${next ? "live" : ""}`}
+          style={
+            {
+              "--line": lineColor(data, after.kind, after.line),
+              "--line-ink": inkOn(lineColor(data, after.kind, after.line)),
+            } as CSSProperties
+          }
+        >
+          <span className="ride-change-mark" aria-hidden="true">
+            <svg viewBox="0 0 16 16">
+              <path d="M2.5 5.5 H12 M9.5 3 L12 5.5 L9.5 8 M13.5 10.5 H4 M6.5 8 L4 10.5 L6.5 13" />
+            </svg>
+          </span>
+          <span className="ride-change-what">
+            <span className="ride-change-line">
+              {w.change}
+              <span className={`ride-line ${after.kind}`}>{after.line}</span>
+            </span>
+            <span className="ride-change-where">
+              {w.fromStop(
+                data.stations[data.variants[after.ride.variant].stops[after.ride.at]].name,
+              )}
+            </span>
+          </span>
+          <span className="ride-change-when">
+            {next ? <LiveWaves /> : null}
+            {next?.seconds !== undefined
+              ? describeComing(next.seconds, w)
+              : formatTime(after.ride.departure.seconds)}
+          </span>
         </div>
       ) : null}
       <ul className="rides scroll-list">

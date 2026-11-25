@@ -50,18 +50,74 @@
     stroke-dashoffset: 12;
   }
 }
-/* under it, nearing the stop where you change: the line you change to and how far it is */
-.ride-next {
+/* under it, nearing the stop where you change: the next ride as a card of its own - a round
+   mark in the colour of the line with the arrows of a change, the line and where you get on,
+   and on the right how soon it is there, green with the live waves when its vehicle is seen */
+.ride-change {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin: 2px 2px var(--gap-tight);
-  color: var(--ink-dim);
-  font-size: var(--text);
-  font-weight: 600;
+  gap: 10px;
+  margin: var(--gap-tight) 0 var(--gap);
+  padding: 10px 12px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--raised);
   animation: panel-swap 380ms var(--ease) backwards;
 }
-.ride-next.live {
+.ride-change-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--line-ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--line) 22%, transparent);
+}
+.ride-change-mark svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ride-change-what {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.ride-change-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  font-weight: 650;
+}
+.ride-change-line .ride-line {
+  background: var(--line);
+}
+.ride-change-where {
+  overflow: hidden;
+  color: var(--ink-dim);
+  font-size: var(--text-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ride-change-when {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-dim);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.ride-change.live .ride-change-when {
   color: var(--live);
 }
 .ride-title .trip-late {
