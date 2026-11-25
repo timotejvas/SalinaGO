@@ -1,6 +1,6 @@
 # How ŠalinaGO works
 
-<sub>← [Back to the README](../README.md) · [Data, sources and licences](./DATA.md) · ŠalinaGO 1.0.1</sub>
+<sub>← [Back to the README](../README.md) · [Data, sources and licences](./DATA.md) · ŠalinaGO 1.0.2</sub>
 
 The engineering side of the app: how every feature works underneath, how the code is laid out
 and how its parts talk to each other, and what was fixed on the way to 1.0.
@@ -471,6 +471,16 @@ Every entry: **Problem** → **Cause** → **Solution**.
 | On a late vehicle, the way you were on could vanish before you were there.                                          | It was kept only 2 minutes past the timetable's arrival.                                              | Kept at least 10 minutes, and closed by the app once you really are there.                                                                                         |
 | A journey ended without saying so.                                                                                  | There was no "there" state.                                                                           | _You're there_, then the panel closes by itself.                                                                                                                   |
 | A shared link showed no picture, and the icon was a plain dot.                                                      | No link preview tags, one small icon.                                                                 | A new icon (a line with stops, as on the loading screen) for tabs, iPhone and Android, a web app manifest, and a link preview image with its tags.                 |
+
+</details>
+
+<details>
+<summary><b>🔧 Version 1.0.2</b></summary>
+
+| Problem                                                                                       | Cause                                                                                                                                               | Solution                                                                                                                 |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| On an iPhone, with the keyboard up, the fields of the panel were above the top of the screen. | An iPhone moves what is seen down the page rather than covering its bottom, so nothing looked covered, and the panel was sized by the whole screen. | The panel is sized by what is seen whenever it is shorter than the page - however the phone makes room for the keyboard. |
+| On a phone the (i) of the map credits did not line up with the gear above it.                 | It was smaller (24 px), without a rim, its middle 4 px aside.                                                                                       | A round pane like the gear: 32 px, the same glass and rim, right under it.                                               |
 
 </details>
 

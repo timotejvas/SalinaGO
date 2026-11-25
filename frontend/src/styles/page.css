@@ -88,13 +88,38 @@ body {
    folded into the (i) under the settings button (map/createMap.ts folds them) */
 @media (max-width: 600px) {
   .maplibregl-ctrl-bottom-right {
-    top: calc(max(8px, env(safe-area-inset-top)) + 36px);
+    /* under the gear (ui/Corner.css: 32 px tall), with the same 8 px between them as round it */
+    top: calc(max(8px, env(safe-area-inset-top)) + 40px);
     right: auto;
     bottom: auto;
     left: 0;
   }
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
     margin: 0 0 0 8px;
+  }
+  /* folded, the (i) is a round pane like the gear above it: as big, the same glass and rim,
+     its middle right under the gear's */
+  .maplibregl-map
+    .maplibregl-ctrl-bottom-right
+    .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) {
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0;
+    border: 1px solid var(--glass-edge);
+    border-radius: 50%;
+  }
+  .maplibregl-map
+    .maplibregl-ctrl-bottom-right
+    .maplibregl-compact:not(.maplibregl-compact-show)
+    .maplibregl-ctrl-attrib-button {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-position: center;
+    background-repeat: no-repeat;
   }
   /* opened, the credits take a few short lines inside the screen, under the gear, and leave
      the clock its corner */

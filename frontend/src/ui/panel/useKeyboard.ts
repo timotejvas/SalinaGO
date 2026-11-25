@@ -20,17 +20,21 @@ export function useKeyboard() {
     const view = window.visualViewport;
     if (!view) return;
     const root = document.documentElement;
-    // Only while a keyboard covers part of the page. Otherwise the panel goes by 1dvh, which
-    // the browser changes in the same moment the screen changes size (turned, a keyboard that
-    // makes the page shorter on Android): a value written here would come a few frames later.
+    // Only while a keyboard is up - while what is seen is shorter than the page. Otherwise the
+    // panel goes by 1dvh, which the browser changes in the same moment the screen changes size
+    // (turned, a keyboard that makes the page shorter on Android): a value written here would
+    // come a few frames later. An iPhone may move what is seen down the page rather than cover
+    // its bottom, so nothing looks covered then - and yet the panel must be no taller than
+    // what is seen.
     let was = "";
     const fit = () => {
-      const covered = Math.round(root.clientHeight - (view.height + view.offsetTop));
-      const now = covered > 0 ? `${covered}px ${view.height / 100}px` : "";
+      const up = view.height < root.clientHeight - 1;
+      const covered = Math.max(0, Math.round(root.clientHeight - (view.height + view.offsetTop)));
+      const now = up ? `${covered}px ${view.height / 100}px` : "";
       if (now === was) return;
       movedAt = performance.now();
       was = now;
-      if (covered > 0) {
+      if (up) {
         root.style.setProperty("--keyboard", `${covered}px`);
         root.style.setProperty("--screen-1", `${view.height / 100}px`);
       } else {
