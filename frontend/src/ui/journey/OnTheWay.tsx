@@ -32,6 +32,7 @@ type Props = {
   where: RideNow | null; // where it is
   next: Incoming | null; // nearing a change: the vehicle coming for the next ride
   nearing: boolean; // nearing the stop where you change
+  arrived: boolean; // the last ride is over: you are there, or have only the walk to the end left
   hidden: boolean; // the journey is kept under the lines, out of sight
   onClose: () => void;
   onPickStop: (stop: JourneyStop) => void;
@@ -48,19 +49,24 @@ export default function OnTheWay({
   where,
   next,
   nearing,
+  arrived,
   hidden,
   onClose,
   onPickStop,
 }: Props) {
   const w = useWords();
   const ride = way.legs[leg];
-  const late = yours !== undefined && !onTime(yours);
+  const late = !arrived && yours !== undefined && !onTime(yours);
+  const walkLeft = way.walkLast?.minutes ?? way.walkAfter?.minutes;
 
   // after a change, still waiting: which line you change to, and when it comes - live, or as
   // the timetable has it; otherwise where your vehicle is
   const state = where?.state ?? "coming";
-  const title =
-    leg > 0 && state === "coming"
+  const title = arrived
+    ? walkLeft
+      ? w.walkRest(walkLeft)
+      : w.arrived
+    : leg > 0 && state === "coming"
       ? `${w.changeTo(ride.line)} · ${
           where?.state === "coming"
             ? describeComing(where.seconds, w)
@@ -69,13 +75,20 @@ export default function OnTheWay({
       : state === "atStop"
         ? w.atStop
         : w.onTheWay;
-  const after = nearing ? way.legs[leg + 1] : undefined;
+  const after = nearing && !arrived ? way.legs[leg + 1] : undefined;
 
   return (
     <div className="journey riding" hidden={hidden}>
       <div className="ride-head">
-        <strong className={`ride-title ${late ? "late" : ""}`}>
-          {yours ? <LiveWaves /> : null}
+        <strong className={`ride-title ${late ? "late" : ""} ${arrived ? "there" : ""}`}>
+          {arrived ? (
+            <svg className="ride-there" viewBox="0 0 16 16" aria-hidden="true">
+              <circle cx="8" cy="8" r="7" />
+              <path d="M4.6 8.2 L7 10.5 L11.4 5.8" />
+            </svg>
+          ) : yours ? (
+            <LiveWaves />
+          ) : null}
           {title}
           {late ? <span className="trip-late">{describeRunning(yours, w)}</span> : null}
         </strong>

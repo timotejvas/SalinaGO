@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <!-- to the edges of the screen (the notch and the home bar are kept clear in the CSS), and
          a keyboard on Android makes the page shorter, so the sheet stays above it -->
     <meta
@@ -12,7 +15,27 @@
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>ŠalinaGO</title>
+    <title>ŠalinaGO – brněnská MHD živě na 3D mapě</title>
+    <meta
+      name="description"
+      content="Šaliny, trolejbusy a autobusy v Brně živě na 3D mapě – a plánovač spojení, který sleduje vaši jízdu zastávku po zastávce."
+    />
+    <link rel="canonical" href="https://salinago.cz/" />
+    <!-- what a shared link shows (the image needs a whole address) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ŠalinaGO" />
+    <meta property="og:url" content="https://salinago.cz/" />
+    <meta property="og:title" content="ŠalinaGO – brněnská MHD živě na 3D mapě" />
+    <meta
+      property="og:description"
+      content="Šaliny, trolejbusy a autobusy v Brně živě na 3D mapě – a plánovač spojení, který sleduje vaši jízdu zastávku po zastávce."
+    />
+    <meta property="og:image" content="https://salinago.cz/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Mapa Brna s vozidly MHD a nápisem ŠalinaGO" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>

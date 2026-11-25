@@ -220,6 +220,7 @@ export default function App() {
                 vehicles={lineVehicles}
                 liveStatus={liveStatus}
                 space={space}
+                covered={Boolean(station || openVehicle)}
               />
             )}
             {/* the journey stays under the lines, so that it is there as you left it */}

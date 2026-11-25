@@ -5,10 +5,10 @@
 **Brno's trams, trolleybuses and buses - live on a 3D map,<br/>with a journey planner that rides along with you.**
 
 [![CI](https://github.com/timotejvas/SalinaGO/actions/workflows/ci.yml/badge.svg)](https://github.com/timotejvas/SalinaGO/actions/workflows/ci.yml)
-![Version 1.0](https://img.shields.io/badge/version-1.0-e5484d)
+![Version 1.0.1](https://img.shields.io/badge/version-1.0.1-e5484d)
 ![MIT](https://img.shields.io/badge/licence-MIT-blue)
 
-### [Open the app →](https://timotejvas.github.io/SalinaGO/)
+### [Open the app → salinago.cz](https://salinago.cz)
 
 <!-- the hero video: on github.com, edit this file, drag the .mp4 in here and keep the link it gives on its own line -->
 
@@ -163,8 +163,8 @@ Every push to `main` is checked and put online on GitHub Pages
 
 ## Status
 
-**Version 1.0 - live at [timotejvas.github.io/SalinaGO](https://timotejvas.github.io/SalinaGO/).** Every push to `main` goes
-online by itself.
+**Version 1.0.1 - live at [salinago.cz](https://salinago.cz).** Every push to `main` goes online by
+itself, and so does every new timetable.
 
 ## Licence and credits
 

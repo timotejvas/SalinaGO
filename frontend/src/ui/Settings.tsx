@@ -3,7 +3,7 @@
 // live positions are coming, and whose data and work all of it is. A click beside it, Escape or
 // the close button puts it away.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TransitData } from "../logic/timetable/loadData";
 import { formatDate, TIME_ZONE } from "../logic/timetable/clock";
 import type { LiveStatus } from "../logic/live/vehicles";
@@ -20,6 +20,8 @@ const LANGUAGES: { lang: Lang; label: string }[] = [
   { lang: "cs", label: "Čeština" },
 ];
 const CLOSE_MS = 220; // keep in sync with the way out in Settings.css
+// what Tab stops at inside the pane
+const FOCUSABLE = "button:not(:disabled), a[href], input:not(:disabled), textarea:not(:disabled)";
 // ------------------------------
 
 type Props = {
@@ -35,6 +37,7 @@ export default function Settings({ data, liveStatus, vehicles, context, onClose 
   const on = LANGUAGES.findIndex((l) => l.lang === lang);
   const [closing, setClosing] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const pane = useRef<HTMLDivElement>(null);
 
   // it goes the way it came, and is taken off the page after
   function close() {
@@ -45,15 +48,42 @@ export default function Settings({ data, liveStatus, vehicles, context, onClose 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
+      if (event.key === "Tab") keepFocusIn(event);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
 
+  // the keyboard stays in the pane while it is open - Tab goes round its buttons and fields, not
+  // on to the map under it - and goes back to where it was (the gear) when it closes
+  useEffect(() => {
+    const before = document.activeElement;
+    pane.current?.focus();
+    return () => {
+      if (before instanceof HTMLElement) before.focus();
+    };
+  }, []);
+  function keepFocusIn(event: KeyboardEvent) {
+    const parts = [...(pane.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])];
+    if (parts.length === 0) return;
+    const [first, last] = [parts[0], parts[parts.length - 1]];
+    const at = document.activeElement;
+    const inside = pane.current?.contains(at) && at !== pane.current;
+    if (event.shiftKey && (at === first || !inside)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (at === last || !inside)) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   return (
     <div className={`settings-veil ${closing ? "closing" : ""}`} onClick={close}>
       <div
         className="settings"
+        ref={pane}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={w.settings}

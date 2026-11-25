@@ -46,6 +46,10 @@
     sans-serif;
   animation: settings-in 380ms var(--settle) both;
 }
+/* the pane takes the focus as it opens, so that Tab starts inside it; it needs no ring itself */
+.settings:focus {
+  outline: none;
+}
 .settings-veil.closing .settings {
   animation: settings-out 220ms ease both;
 }
@@ -185,6 +189,13 @@
 .report-failed {
   color: var(--error);
 }
+/* what the form service said, under it: for whoever reads the report back */
+.report-why {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: var(--text-meta);
+}
 .report-done {
   padding: var(--gap-section) 0;
   color: var(--live);
@@ -250,9 +261,5 @@
     to {
       transform: translateY(100%);
     }
-  }
-  .report-text,
-  .report-contact {
-    font-size: 16px;
   }
 }

@@ -1,6 +1,6 @@
 # Data sources
 
-<sub>← [Back to the README](../README.md) · [How it works](./ARCHITECTURE.md) · ŠalinaGO 1.0</sub>
+<sub>← [Back to the README](../README.md) · [How it works](./ARCHITECTURE.md) · ŠalinaGO 1.0.1</sub>
 
 Every shape and number on the map comes from the sources below: the timetable, the routes and
 the paths to walk along from files prepared in advance, the vehicles on the way from a live
@@ -160,16 +160,16 @@ The live stream is used for the journey as well. A vehicle is never tied to a de
 because the stream does not say which trip it is running (see [Live vehicles](#live-vehicles)):
 the times shown are always the timetable's, and the delay stands beside them.
 
-| What                       | Rule (`logic/journey/incoming.ts`, `progress.ts`, `hooks/useJourneyProgress.ts`)                                                                                                                               |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The vehicle coming for you | a vehicle of the line on the route of the ride, before your stop and still to drive past it; only for a ride leaving within **30 minutes** - one driving past now says nothing about a ride two hours from now |
-| How long it is looked for  | until **5 minutes** after the timetable's departure, so one running late is still coming                                                                                                                       |
-| Yours                      | once found, it is remembered **by its number**; the next vehicle of the line is never taken for it - unless yours drops out of the stream while you still wait                                                 |
-| Arriving                   | closer than **45 s** it is "arriving" rather than minutes away                                                                                                                                                 |
-| On the way                 | once your vehicle is at your stop, the panel shows only your way                                                                                                                                               |
-| Nearing a change           | **3 stops** before the stop where you change - or **6 minutes** by the timetable without a live vehicle - the vehicle of the next ride is shown, coming along its route                                        |
-| The ride is over           | your vehicle has reached the stop where you get off - or, without a live vehicle, a **minute** after the timetable has you there; the next ride becomes the one followed                                       |
-| There                      | the way stays for **2 minutes** after you arrive                                                                                                                                                               |
+| What                       | Rule (`logic/journey/incoming.ts`, `progress.ts`, `hooks/useJourneyProgress.ts`)                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The vehicle coming for you | a vehicle of the line on the route of the ride, before your stop and still to drive past it; only for a ride leaving within **30 minutes** - one driving past now says nothing about a ride two hours from now                                                                                                                                                                                                              |
+| How long it is looked for  | until **5 minutes** after the timetable's departure, so one running late is still coming                                                                                                                                                                                                                                                                                                                                    |
+| Yours                      | once found, it is remembered **by its number**; the next vehicle of the line is never taken for it - unless yours drops out of the stream while you still wait                                                                                                                                                                                                                                                              |
+| Arriving                   | closer than **45 s** it is "arriving" rather than minutes away                                                                                                                                                                                                                                                                                                                                                              |
+| On the way                 | once your vehicle is at your stop, the panel shows only your way                                                                                                                                                                                                                                                                                                                                                            |
+| Nearing a change           | **3 stops** before the stop where you change - or **6 minutes** by the timetable without a live vehicle - the vehicle of the next ride is shown, coming along its route                                                                                                                                                                                                                                                     |
+| The ride is over           | your vehicle has reached the stop where you get off - or, without a live vehicle, a **minute** after the timetable has you there; the next ride becomes the one followed                                                                                                                                                                                                                                                    |
+| There                      | the last ride is over - your vehicle is at the stop where you get off, or without a live vehicle the timetable has had you there for a minute: the panel says **You're there** (or **The rest on foot · N min** with a walk to an address) and closes by itself **a minute** later, plus the walk. Until then the way is kept at least **10 minutes** past the timetable's arrival, so that a late vehicle does not lose it |
 
 Live information always keeps the real clock: a way planned for the evening does not claim a
 tram leaves in four minutes, and the notes of the stream stay silent for a departure that is
@@ -234,6 +234,21 @@ the next position takes to come, and only a position that is late makes the gues
 brakes over the last 30 m before a stop, is never shown beyond its next stop, and one standing at
 a stop is drawn on the platform. On the map, the dot follows that guess along the route, never
 jumping and never going backwards.
+
+**Which vehicles are shown.** Only those on a trip with a route of ours to ride along
+(`inService`, `logic/live/trip.ts`). The others still send where they are, but are left out:
+
+- a vehicle whose last stop is its final stop - its trip is over, it waits at the end or drives
+  to the depot;
+- a vehicle outside Brno, whose last stop is on none of our routes (a regional bus before it
+  reaches the city);
+- a vehicle whose final stop is outside Brno and that is on no stretch of its line's routes
+  (most often one driving to the depot).
+
+A regional bus leaving Brno, whose final stop is outside it, is shown: its route is the one whose
+next stretch it is on (within 150 m). Measured on 25 Nov 2026 around noon: 56 of 405 vehicles
+left out - 37 outside Brno, 15 at the end of their trip, 4 to the depot - and 15 regional buses
+leaving Brno, which had no route before, now have one.
 
 What is **not** taken from the live data: which trip a vehicle is on. The official GTFS Realtime
 feed of KORDIS (`gtfsReal.dat`, CC BY 4.0) does say it, but its trip ids do not match any
@@ -358,6 +373,8 @@ Earlier checks (13 Nov 2026):
 - Regional buses are followed only inside Brno, because the routes end at the city boundary;
   outside it their position is shown where the stream puts it.
 - Journeys have at most two changes and look at the rest of today and tomorrow.
+- Vehicles outside Brno, and those that have finished their trip, are not shown (see
+  "Which vehicles are shown").
 - Trains are not shown.
 
 ## Attribution

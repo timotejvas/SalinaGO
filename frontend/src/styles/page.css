@@ -10,6 +10,17 @@ body,
   height: 100%;
   background: #000;
 }
+/* a phone zooms the whole page in when the cursor goes into a field whose text is smaller than
+   16 px (and leaves you there): on a touch screen every field has that size, whatever its own
+   styles say - one rule here rather than one in each of them. Pinching still zooms. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* an app, not a page: the page itself never bounces or scrolls, and a tap does not flash */
 html,
 body {

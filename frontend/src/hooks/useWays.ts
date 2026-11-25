@@ -25,7 +25,9 @@ import type { Walking } from "../logic/walk/load";
 import { useWalking } from "./useWalking";
 
 // ---------- settings ----------
-const ARRIVED_S = 120; // the way you are on stays this long after you are there
+// the way you are on stays at least this long after the timetable has you there: a vehicle
+// running late is still on it. Once it really is there, the planner closes it (You're there).
+const ARRIVED_S = 10 * 60;
 // ------------------------------
 
 type Ask = {

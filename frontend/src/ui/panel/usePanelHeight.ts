@@ -5,6 +5,7 @@
 
 import { useEffect, type RefObject } from "react";
 import { EASE, lessMotion } from "../../screen";
+import { keyboardJustMoved } from "./useKeyboard";
 
 const GLIDE = { duration: 380, easing: EASE };
 
@@ -17,17 +18,32 @@ export function usePanelHeight(panelRef: RefObject<HTMLDivElement | null>) {
 
     // the observer sees the new height before it is painted, so the glide starts from the old
     const observer = new ResizeObserver(() => {
+      // the keyboard came or went: straight to the new size, and a glide still on its way to the
+      // old one stops there
+      if (keyboardJustMoved()) {
+        if (glide) {
+          glide.onfinish = glide.oncancel = null;
+          glide.cancel();
+          glide = null;
+          panel.classList.remove("gliding");
+        }
+        height = panel.getBoundingClientRect().height;
+        return;
+      }
       if (glide) return; // its own frames; where it ends is looked at when it has
       const to = panel.getBoundingClientRect().height;
       const from = height;
       height = to;
       if (lessMotion() || panel.classList.contains("held") || Math.abs(to - from) < 2) return;
       panel.classList.add("gliding");
+      // let go with a flick, it arrives sooner: the finger said how fast (usePanelDrag.ts)
+      const duration = Number(panel.dataset.glide) || GLIDE.duration;
+      delete panel.dataset.glide;
       // (its sizes include its padding and edge, as measured; and its highest, max-height,
       // would hold it down when it shrinks)
       glide = panel.animate(
         { height: [`${from}px`, `${to}px`], maxHeight: ["none", "none"] },
-        GLIDE,
+        { ...GLIDE, duration },
       );
       glide.onfinish = glide.oncancel = () => {
         glide = null;

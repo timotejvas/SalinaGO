@@ -1,4 +1,4 @@
-// Keeps the live vehicles up to date: connects to the stream, hands all vehicles to App
+// Keeps the live vehicles up to date: connects to the stream, hands the vehicles in service to App
 // (the line panel shows them too) and draws them on the map: all of them, or only the ones it
 // is given - those of a chosen line, or those going your way on a journey. It shows nothing itself.
 // It connects as soon as the timetable is here, while the map may still be loading, because the
@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import type { TransitData } from "../logic/timetable/loadData";
 import { watchVehicles, type LiveStatus, type Vehicle } from "../logic/live/vehicles";
+import { inService } from "../logic/live/trip";
 import { onVehiclePick, setVehicles } from "../map/transit/vehiclesLayer";
 import { lineColor } from "../colors";
 
@@ -54,7 +55,9 @@ export default function LiveVehicles({
     const stop = watchVehicles(
       data,
       (latest) => {
-        onVehicles(latest);
+        // only those on a trip with a route: one that has finished its trip, drives to the
+        // depot or is outside Brno still sends its position, but is of no use on the map
+        onVehicles(latest.filter((vehicle) => inService(data, vehicle)));
         onLoaded(); // the first ones are in; App waits for the map on its own
       },
       (status) => {

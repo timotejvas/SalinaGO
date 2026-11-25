@@ -31,6 +31,25 @@
 .ride-title.late {
   color: var(--late);
 }
+/* there: a tick in a ring, drawn as it appears */
+.ride-there {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ride-there path {
+  stroke-dasharray: 12;
+  animation: ride-there 500ms 150ms var(--ease) both;
+}
+@keyframes ride-there {
+  from {
+    stroke-dashoffset: 12;
+  }
+}
 /* under it, nearing the stop where you change: the line you change to and how far it is */
 .ride-next {
   display: flex;
@@ -49,7 +68,8 @@
   margin-left: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .journey.riding > * {
+  .journey.riding > *,
+  .ride-there path {
     animation: none;
   }
 }

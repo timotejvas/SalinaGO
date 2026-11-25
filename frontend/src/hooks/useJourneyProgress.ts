@@ -65,6 +65,10 @@ export function useJourneyProgress({ data, now, vehicles, way, legs, live }: Ask
     if (over) keep({ leg: leg + 1, mine: null });
   }, [over, leg]);
 
+  // the last ride is over: you are there - or off the last vehicle, with a walk still to go
+  const arrived =
+    current !== undefined && leg === legs.length - 1 && live && rideOver(data, current, yours, now);
+
   // where your vehicle is
   const where = live && current && yours ? rideNow(data, current, yours, now) : null;
   const state = where?.state ?? "coming";
@@ -83,6 +87,7 @@ export function useJourneyProgress({ data, now, vehicles, way, legs, live }: Ask
     // you are on your way: on a vehicle that picked you up, or after a change
     onWay: leg > 0 || state !== "coming",
     nearing, // nearing the stop where you change
+    arrived, // the last ride is over
     next, // the vehicle coming for the next ride, then, when one is
   };
 }

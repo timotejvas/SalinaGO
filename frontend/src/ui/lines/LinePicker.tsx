@@ -29,6 +29,7 @@ type Props = {
   vehicles: Vehicle[]; // the live vehicles of the chosen line
   liveStatus: LiveStatus; // whether the stream is answering
   space: () => Space; // the room the panel takes, so that the map keeps it free
+  covered: boolean; // something is open over the line (a vehicle of it)
 };
 
 export default function LinePicker({
@@ -42,6 +43,7 @@ export default function LinePicker({
   vehicles,
   liveStatus,
   space,
+  covered,
 }: Props) {
   const w = useWords();
   const lines = useMemo(() => lineNumbers(data, kind, now), [data, kind, now]);
@@ -110,6 +112,7 @@ export default function LinePicker({
           vehicles={vehicles}
           liveStatus={liveStatus}
           space={space}
+          covered={covered}
           onClose={() => onLineChange(null)}
         />
       )}

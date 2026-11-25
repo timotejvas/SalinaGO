@@ -3,7 +3,7 @@
 // moving down the strip as it drives. The route ahead grows out of it on the map
 // (map/transit/routesLayer.ts); the × closes it, and the whole line opens in the lines mode.
 
-import { useEffect, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import type { TransitData } from "../logic/timetable/loadData";
 import { formatTime, type Now } from "../logic/timetable/clock";
@@ -16,6 +16,7 @@ import { describeRunning, onTime } from "../logic/journey/incoming";
 import { inkOn, lineColor } from "../colors";
 import { focusOn, type Space } from "../map/camera";
 import { followRouteAhead, showRouteAhead } from "../map/transit/routesLayer";
+import { markStop } from "../map/transit/highlightLayer";
 import { shownAt } from "../map/transit/vehiclesLayer";
 import Strip, { type StripRow } from "./Strip";
 import LiveWaves from "./LiveWaves";
@@ -36,6 +37,20 @@ export default function VehicleCard({ map, data, vehicle, now, space, onLine, on
   const w = useWords();
   const trip = vehicleTrip(data, vehicle);
   const color = lineColor(data, vehicle.kind, vehicle.line);
+  // the stop clicked in the strip, as everywhere else: its circle fills, the map goes to it and
+  // marks it; a second click lets it go. Of this vehicle only, and gone once it has passed it.
+  const [picked, setPicked] = useState<{ vehicle: number; stop: string } | null>(null);
+  const pickedStop =
+    picked?.vehicle === vehicle.id
+      ? trip?.ahead.find((stop) => stop.id === picked.stop)
+      : undefined;
+  const pickedLon = pickedStop?.lon;
+  const pickedLat = pickedStop?.lat;
+  useEffect(() => {
+    if (pickedLon === undefined || pickedLat === undefined) return;
+    markStop(map, { lon: pickedLon, lat: pickedLat }, color);
+    return () => markStop(map, null);
+  }, [map, pickedLon, pickedLat, color]);
 
   // the map goes to it when it is opened
   useEffect(() => {
@@ -84,7 +99,12 @@ export default function VehicleCard({ map, data, vehicle, now, space, onLine, on
           color,
           end: i === trip.ahead.length - 1,
           time: formatTime(now.seconds + Math.max(0, stop.seconds)),
-          onPick: () => focusOn(map, stop, space()),
+          picked: stop.id === pickedStop?.id,
+          onPick: () => {
+            const again = stop.id === pickedStop?.id;
+            setPicked(again ? null : { vehicle: vehicle.id, stop: stop.id });
+            focusOn(map, stop, space());
+          },
         })),
       ]
     : [];

@@ -52,6 +52,7 @@ type Props = {
   liveStatus: LiveStatus;
   space: () => Space; // the room the panel takes, so that the map keeps it free
   onClose: () => void; // back to all the lines
+  covered: boolean; // a vehicle is open over the line: its route steps aside on the map
 };
 
 export default function LineOverview({
@@ -64,6 +65,7 @@ export default function LineOverview({
   vehicles,
   liveStatus,
   space,
+  covered,
 }: Props) {
   const w = useWords();
   const [directionId, setDirectionId] = useState<string | null>(null);
@@ -80,7 +82,8 @@ export default function LineOverview({
   );
 
   const shownId = route?.id ?? null;
-  useLineOnMap({ map, data, kind, line, directions, shownId, space });
+  const picked = stops.find((stop) => stop.id === pickedStop) ?? null;
+  useLineOnMap({ map, data, kind, line, directions, shownId, space, picked, covered });
 
   if (!direction || !route) return null;
 

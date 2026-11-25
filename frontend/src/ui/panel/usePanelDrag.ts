@@ -15,6 +15,8 @@ import { HEIGHT, nearest, next, onwards, stretched, type Height } from "./contro
 // ---------- settings ----------
 const FLICK = 0.4; // px/ms: faster than this, let go, is a flick
 const SLOP = 6; // px a finger moves before it is a drag rather than a tap
+// the glide after a flick: the faster the finger, the shorter, between these (ms)
+const FLICK_GLIDE = [220, 380];
 // what of the panel a finger moves it by, wherever it is scrolled
 const HEAD = ".grab, .panel-top, .station-head, .overview-head, .ride-head";
 // ------------------------------
@@ -89,7 +91,13 @@ export function usePanelDrag(
       const [first, last] = [drag.moves[0], drag.moves[drag.moves.length - 1]];
       const speed = first && last && last.t > first.t ? (last.y - first.y) / (last.t - first.t) : 0;
       start = drag = null;
-      letGo(panel, Math.abs(speed) > FLICK ? onwards(at, speed < 0) : nearest(at));
+      const flick = Math.abs(speed) > FLICK;
+      if (flick) {
+        // carries on at about the speed it was let go with, rather than slowing to a crawl
+        const ms = FLICK_GLIDE[1] - (Math.abs(speed) - FLICK) * 200;
+        panel.dataset.glide = String(Math.round(Math.max(FLICK_GLIDE[0], ms)));
+      }
+      letGo(panel, flick ? onwards(at, speed < 0) : nearest(at));
     };
 
     panel.addEventListener("touchstart", begin, { passive: true });

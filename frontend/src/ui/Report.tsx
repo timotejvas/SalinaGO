@@ -26,6 +26,7 @@ export default function Report({ context, onBack }: Props) {
   const [text, setText] = useState("");
   const [contact, setContact] = useState("");
   const [state, setState] = useState<State>("writing");
+  const [why, setWhy] = useState(""); // what the service said when it did not take the report
 
   async function send() {
     if (!REPORT_KEY || !text.trim()) return;
@@ -43,8 +44,16 @@ export default function Report({ context, onBack }: Props) {
           context,
         }),
       });
-      setState(response.ok ? "sent" : "failed");
-    } catch {
+      // the service answers 200 only when it took the report, and says why when it did not
+      const answer = await response.json().catch(() => null);
+      if (response.ok && answer?.success !== false) {
+        setState("sent");
+      } else {
+        setWhy(answer?.message ?? `HTTP ${response.status}`);
+        setState("failed");
+      }
+    } catch (error) {
+      setWhy(error instanceof Error ? error.message : "");
       setState("failed");
     }
   }
@@ -83,7 +92,12 @@ export default function Report({ context, onBack }: Props) {
         onChange={(event) => setContact(event.target.value)}
       />
       <p className="report-note">{REPORT_KEY ? w.reportAttached : w.reportOff}</p>
-      {state === "failed" ? <p className="report-failed">{w.reportFailed}</p> : null}
+      {state === "failed" ? (
+        <p className="report-failed">
+          {w.reportFailed}
+          {why ? <span className="report-why">{why}</span> : null}
+        </p>
+      ) : null}
       <div className="report-actions">
         <button className="report-back" onClick={onBack}>
           {w.back}

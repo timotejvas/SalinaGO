@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { useWords } from "./language";
+import { VERSION } from "../version";
 import "./LoadingScreen.css";
 
 // ---------- settings ----------
@@ -89,7 +90,9 @@ export default function LoadingScreen({ loading, steps }: Props) {
           {line < 0 ? text : lines[line % lines.length]}
         </div>
       </div>
-      <div className="loading-by">{w.madeBy} Timotej V.</div>
+      <div className="loading-by">
+        {w.madeBy} Timotej V. · {w.version} {VERSION}
+      </div>
     </div>
   );
 }

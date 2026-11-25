@@ -23,6 +23,8 @@ const CARRY_ON_OPACITY = 0.18;
 const WIDE = [2.5, 6];
 const THIN = [1.5, 3.5];
 const DRAW_MS = 1500; // the line grows from one end to the other in this time
+const PICKED_SIZE = [5, 11]; // the stop picked in the panel, at zoom 10 and 16
+const PICK_MS = 450; // how long it takes to spring up
 // ------------------------------
 
 const SOURCE_ID = "highlight"; // the lines, redrawn every frame while one draws itself
@@ -34,6 +36,7 @@ const LINE_ID = "highlight-line";
 const WALK_ID = "highlight-walk";
 const DOTS_ID = "highlight-dots";
 const LABELS_ID = "highlight-labels";
+const PICKED_ID = "highlight-picked"; // the stop picked in the panel: white, bigger, with a glow
 
 // The part of a station this file needs.
 export type HighlightStation = { name: string; lon: number; lat: number };
@@ -141,6 +144,38 @@ export function addHighlight(map: MapLibreMap) {
       "circle-stroke-width": 2,
     },
   });
+  // the stop picked in the panel, over the other stops and under their names
+  map.addSource(PICKED_ID, { type: "geojson", data: empty });
+  map.addLayer({
+    id: `${PICKED_ID}-glow`,
+    type: "circle",
+    source: PICKED_ID,
+    paint: {
+      "circle-color": ["get", "color"],
+      "circle-radius": pickedRadius(2.4),
+      "circle-blur": 1,
+      "circle-opacity": 0,
+      "circle-opacity-transition": { duration: 0, delay: 0 }, // markStop springs it frame by frame
+      "circle-radius-transition": { duration: 0, delay: 0 },
+    },
+  });
+  map.addLayer({
+    id: PICKED_ID,
+    type: "circle",
+    source: PICKED_ID,
+    paint: {
+      "circle-color": "#ffffff",
+      "circle-radius": pickedRadius(1),
+      "circle-stroke-color": ["get", "color"],
+      "circle-stroke-width": 3.5,
+      "circle-opacity": 0,
+      "circle-stroke-opacity": 0,
+      "circle-opacity-transition": { duration: 0, delay: 0 },
+      "circle-stroke-opacity-transition": { duration: 0, delay: 0 },
+      "circle-radius-transition": { duration: 0, delay: 0 },
+    },
+  });
+
   map.addLayer({
     id: LABELS_ID,
     type: "symbol",
@@ -332,4 +367,63 @@ export function setOtherRoutes(map: MapLibreMap, parts: HighlightPart[]) {
     type: "FeatureCollection",
     features: [...featuresOf(parts), ...stopsOf(parts)],
   });
+}
+
+// Marks the stop picked in the panel (null takes the mark off): a white dot in a ring of the
+// line's colour, springing up from half its size - the way its circle in the strip does.
+let picking: number | undefined;
+export function markStop(
+  map: MapLibreMap,
+  stop: { lon: number; lat: number } | null,
+  color = "#ffffff",
+) {
+  if (picking !== undefined) cancelAnimationFrame(picking);
+  map.getSource<GeoJSONSource>(PICKED_ID)?.setData({
+    type: "FeatureCollection",
+    features: stop
+      ? [
+          {
+            type: "Feature",
+            properties: { color },
+            geometry: { type: "Point", coordinates: [stop.lon, stop.lat] },
+          },
+        ]
+      : [],
+  });
+  const show = (share: number) => {
+    // a little past its size and back, like a spring (an ease-out-back curve)
+    const t = share - 1;
+    const size = 0.5 + 0.5 * (1 + 2.70158 * t ** 3 + 1.70158 * t ** 2);
+    const seen = Math.min(1, share * 2);
+    map.setPaintProperty(`${PICKED_ID}-glow`, "circle-radius", pickedRadius(2.4 * size));
+    map.setPaintProperty(`${PICKED_ID}-glow`, "circle-opacity", 0.45 * seen);
+    map.setPaintProperty(PICKED_ID, "circle-radius", pickedRadius(size));
+    map.setPaintProperty(PICKED_ID, "circle-opacity", seen);
+    map.setPaintProperty(PICKED_ID, "circle-stroke-opacity", seen);
+  };
+  if (!stop || lessMotion()) return show(1);
+  const started = performance.now();
+  const frame = () => {
+    const share = Math.min(1, (performance.now() - started) / PICK_MS);
+    show(share);
+    picking = share < 1 ? requestAnimationFrame(frame) : undefined;
+  };
+  show(0);
+  picking = requestAnimationFrame(frame);
+}
+
+// The size of the picked stop's dot as the map zooms, times a share (a zoom curve has to stand
+// alone in a paint property, so it is written out whole each time).
+function pickedRadius(
+  scale: number,
+): ["interpolate", ["linear"], ["zoom"], number, number, number, number] {
+  return [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    10,
+    PICKED_SIZE[0] * scale,
+    16,
+    PICKED_SIZE[1] * scale,
+  ];
 }
