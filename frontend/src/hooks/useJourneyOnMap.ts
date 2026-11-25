@@ -121,12 +121,18 @@ export function useJourneyOnMap({
   // to the next stop, not with every position
   // - of the ride you are waiting for: the first, after a change the next; and while you near
   // the stop where you change, the next one's, coming to meet you there
+  // Only the vehicle the map shows, once it is known to be yours: a stretch drawn for another -
+  // one the time of the ride does not fit, or the ride as it was before the planner looked
+  // again - came from a vehicle that was not there. The ride as it is now (legs), the stretch
+  // as it is drawn (drawnLegs): the same route.
   const watched = next !== null ? leg + 1 : leg;
   const first = drawnLegs[watched];
-  const found = first ? incomingSoon(data, vehicles, first.ride, now) : null;
-  // only your vehicle, once it is known: not the next one, after yours has left your stop
   const followed = next !== null ? next : mine;
-  const coming = found && (followed === null || found.vehicle.id === followed) ? found : null;
+  const found =
+    first && legs[watched] && followed !== null
+      ? incomingSoon(data, vehicles, legs[watched].ride, now)
+      : null;
+  const coming = found && found.vehicle.id === followed ? found : null;
   const passed = coming && first ? first.ride.at - coming.stopsAway : null;
   // from where it is: the part behind it goes as it drives on (the stops it passed with it)
   const at: [number, number] | null = coming ? [coming.vehicle.lon, coming.vehicle.lat] : null;

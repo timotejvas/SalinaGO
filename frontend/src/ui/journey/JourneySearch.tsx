@@ -73,7 +73,9 @@ export default function JourneySearch({
   // keyboard goes and the panel down to half, so that the map shows them and Search is at hand.
   function picked(place: Place | null, other: Place | null, otherField: number) {
     if (!phone || !place) return;
-    if (!other) return fields.current?.querySelectorAll("input")[otherField]?.focus();
+    // (without a scroll: the phone would move the page to the field as the panel stays)
+    if (!other)
+      return fields.current?.querySelectorAll("input")[otherField]?.focus({ preventScroll: true });
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     movePanel("half");
   }

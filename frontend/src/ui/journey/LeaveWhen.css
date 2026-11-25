@@ -77,10 +77,13 @@
 }
 @media (hover: hover) {
   .when-day:hover,
-  .when-clock:hover,
-  .when-clock:focus-within {
+  .when-clock:hover {
     border-color: var(--ink-dim);
   }
+}
+/* the time being typed: its rim lights up, as every field's does */
+.when-clock:focus-within {
+  border-color: var(--ink-dim);
 }
 .when-day {
   flex: 1;

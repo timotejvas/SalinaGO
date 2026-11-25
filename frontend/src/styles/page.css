@@ -160,6 +160,12 @@ body {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+/* a field shows where you type by its caret and by its own rim, which lights up - a ring as
+   well would be a second, square frame inside a rounded one */
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
 /* the map itself takes the keyboard too (its arrows move it): a ring round the whole screen
    would say nothing the moving map does not */
 .maplibregl-canvas:focus-visible {

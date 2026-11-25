@@ -58,7 +58,7 @@ export default function PlaceField({
     if (!isStation(found) && found.street && text !== `${found.name} `) {
       setText(`${found.name} `);
       setOpen(true);
-      input.current?.focus();
+      input.current?.focus({ preventScroll: true });
       return;
     }
     onChange(found);

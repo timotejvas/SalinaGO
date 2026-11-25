@@ -1,9 +1,9 @@
 // The keyboard of a phone covers the bottom of the page without making it any shorter (an
-// iPhone), and the browser may scroll the page up under it as well: the panel, fixed to the
-// bottom of the page, ended up half under the keyboard with an empty gap above it. What is
-// really left on the screen is the visual viewport; the panel stands on its bottom edge and
-// measures its heights by it: --keyboard and --screen-1 (a hundredth of its height), which
-// Panel.css uses.
+// iPhone), and the browser may move what is seen down the page as well. What is really left on
+// the screen is the visual viewport. The panel is all the way up while a keyboard is out
+// (Panel.tsx), and Panel.css fits it by two numbers written here: --keyboard, how much of the
+// bottom of the page the keyboard covers - what is in the panel ends above it - and --view-top,
+// how far down the page what is seen begins - the top of the panel is that far down too.
 
 import { useEffect } from "react";
 
@@ -24,22 +24,21 @@ export function useKeyboard() {
     // panel goes by 1dvh, which the browser changes in the same moment the screen changes size
     // (turned, a keyboard that makes the page shorter on Android): a value written here would
     // come a few frames later. An iPhone may move what is seen down the page rather than cover
-    // its bottom, so nothing looks covered then - and yet the panel must be no taller than
-    // what is seen.
+    // its bottom, so nothing looks covered then - and yet the top of the panel must follow.
     let was = "";
     const fit = () => {
       const up = view.height < root.clientHeight - 1;
       const covered = Math.max(0, Math.round(root.clientHeight - (view.height + view.offsetTop)));
-      const now = up ? `${covered}px ${view.height / 100}px` : "";
+      const now = up ? `${covered}px ${Math.round(view.offsetTop)}px` : "";
       if (now === was) return;
       movedAt = performance.now();
       was = now;
       if (up) {
         root.style.setProperty("--keyboard", `${covered}px`);
-        root.style.setProperty("--screen-1", `${view.height / 100}px`);
+        root.style.setProperty("--view-top", `${Math.round(view.offsetTop)}px`);
       } else {
         root.style.removeProperty("--keyboard");
-        root.style.removeProperty("--screen-1");
+        root.style.removeProperty("--view-top");
       }
     };
     fit();

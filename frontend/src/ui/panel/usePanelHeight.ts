@@ -18,15 +18,11 @@ export function usePanelHeight(panelRef: RefObject<HTMLDivElement | null>) {
 
     // the observer sees the new height before it is painted, so the glide starts from the old
     const observer = new ResizeObserver(() => {
-      // the keyboard came or went: straight to the new size, and a glide still on its way to the
-      // old one stops there
-      if (keyboardJustMoved()) {
-        if (glide) {
-          glide.onfinish = glide.oncancel = null;
-          glide.cancel();
-          glide = null;
-          panel.classList.remove("gliding");
-        }
+      // The keyboard came or went, the panel all the way up: straight to the new size, as the
+      // top follows where the phone has moved what is seen (Panel.css). Not while it glides:
+      // that is a panel coming down as the keyboard goes, to a height the keyboard does not
+      // change - stopped there, it jumped.
+      if (keyboardJustMoved() && !glide) {
         height = panel.getBoundingClientRect().height;
         return;
       }

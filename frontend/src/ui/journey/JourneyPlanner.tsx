@@ -137,12 +137,18 @@ export default function JourneyPlanner({
     if (ends.length > 0) fitTo(map, ends, space());
   }
 
-  // an end chosen or changed: what was found no longer fits it; the map moves once the panel
-  // has (on a phone it may just have gone down)
+  // An end chosen or changed: what was found no longer fits it; the map moves once the panel
+  // has (on a phone it may just have gone down). Not while the other end is still being typed
+  // on a phone: the panel and the keyboard cover the map then, and a camera flying unseen only
+  // made the typing stutter - it moves when the panel comes down, with both ends.
   function changeEnd(place: Place | null, end: "from" | "to") {
     (end === "from" ? onFromChange : onToChange)(place);
     ways.forget();
-    requestAnimationFrame(() => (end === "from" ? showEnds(place, to) : showEnds(from, place)));
+    requestAnimationFrame(() => {
+      if (phone && document.activeElement instanceof HTMLInputElement) return;
+      if (end === "from") showEnds(place, to);
+      else showEnds(from, place);
+    });
   }
 
   // A click shows what was picked on the map, a second click takes it off again. On a phone

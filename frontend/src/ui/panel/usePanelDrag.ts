@@ -9,7 +9,7 @@
 // draw the whole panel - both modes, every row of a strip - for every pixel, and it stuttered.
 
 import { useEffect, useRef, type PointerEvent, type RefObject } from "react";
-import { isPhone, visibleHeight } from "../../screen";
+import { isPhone } from "../../screen";
 import { HEIGHT, nearest, next, onwards, stretched, type Height } from "./control";
 
 // ---------- settings ----------
@@ -30,8 +30,12 @@ export function usePanelDrag(
   const resting = useRef(height); // for the listeners, which are added once
   resting.current = height;
 
-  // the share of the screen a top edge at this place leaves to the panel
-  const shareAt = (top: number) => 100 - (100 * top) / visibleHeight();
+  // the share of the screen a top edge at this place leaves to the panel - which stands on the
+  // bottom of the screen and measures its heights by it (Panel.css)
+  const shareAt = (panel: HTMLElement, top: number) => {
+    const bottom = panel.getBoundingClientRect().bottom;
+    return (100 * (bottom - top)) / bottom;
+  };
   const hold = (panel: HTMLElement, share: number) => {
     panel.classList.add("held");
     panel.style.setProperty("--panel-height", String(share));
@@ -73,9 +77,10 @@ export function usePanelDrag(
         const own = start.head || (dy > 0 && atTop) || (dy < 0 && resting.current !== "full");
         if (!own) return void (start = null); // a scroll of what is in it
         drag = { grip: start.y - start.top, moves: [] };
+        typedNoMore(panel); // a sheet moved by hand takes the keyboard down with it
       }
       event.preventDefault(); // the panel moves, not what is in it
-      hold(panel, stretched(shareAt(y - drag.grip)));
+      hold(panel, stretched(shareAt(panel, y - drag.grip)));
       drag.moves.push({ y, t: event.timeStamp });
       if (drag.moves.length > 5) drag.moves.shift();
     };
@@ -126,7 +131,7 @@ export function usePanelDrag(
       const panel = panelRef.current;
       if (!panel || !mouse.current) return;
       mouse.current.moved = true;
-      hold(panel, stretched(shareAt(event.clientY - mouse.current.grip), false));
+      hold(panel, stretched(shareAt(panel, event.clientY - mouse.current.grip), false));
     },
     onPointerUp() {
       const panel = panelRef.current;
@@ -137,4 +142,10 @@ export function usePanelDrag(
       letGo(panel, moved ? nearest(at) : next(resting.current)); // a click steps on
     },
   };
+}
+
+// A name being typed in the panel stops: the keyboard goes. It is only ever up all the way up.
+export function typedNoMore(panel: HTMLElement) {
+  const typing = document.activeElement;
+  if (typing instanceof HTMLInputElement && panel.contains(typing)) typing.blur();
 }

@@ -10,9 +10,9 @@ import {
   useState,
   type CSSProperties,
   type FocusEvent,
-  type PointerEvent,
   type ReactNode,
   type RefObject,
+  type TouchEvent,
 } from "react";
 import { flushSync } from "react-dom";
 import type { TransitData } from "../../logic/timetable/loadData";
@@ -21,7 +21,7 @@ import { isTimetableCurrent } from "../../logic/timetable/departures";
 import { EASE, isPhone, lessMotion } from "../../screen";
 import { useWords } from "../language";
 import { HEIGHT, MOVE_EVENT, next, type Height } from "./control";
-import { usePanelDrag } from "./usePanelDrag";
+import { typedNoMore, usePanelDrag } from "./usePanelDrag";
 import { usePanelHeight } from "./usePanelHeight";
 import { useKeyboard } from "./useKeyboard";
 import "./Panel.css";
@@ -30,6 +30,11 @@ export type Mode = "journey" | "lines";
 
 // the journey comes first: it is what the app is for, the lines are there to look around
 const MODES: Mode[] = ["journey", "lines"];
+
+// ---------- settings ----------
+const TAP = 10; // px a finger may move on a field and still have tapped it
+const RISE_MS = 380; // how long the panel takes to rise when a field is tapped
+// ------------------------------
 
 type Props = {
   ref: RefObject<HTMLDivElement | null>; // App measures the panel to keep the map clear of it
@@ -90,23 +95,56 @@ export default function Panel({
     if (isPhone() && event.target instanceof HTMLInputElement) setHeight("full");
   }
 
-  // A finger on a field: all the way up at once - before the field takes the focus, which it
-  // does as the finger lifts. When the keyboard comes, the field is already high on the screen,
-  // and the phone has no reason to move the page to show it: the page moving while the panel
-  // rose was the jump. It still looks as if it glided: drawn where it was, it slides into its
-  // place, without its layout changing on the way.
-  function touchedField(event: PointerEvent<HTMLDivElement>) {
+  // Below all the way up, nothing is typed: the keyboard goes as the panel comes down - pulled
+  // down, or sent down by the app (the ways found) - and the panel glides to where it is going
+  // without waiting for it.
+  useEffect(() => {
+    if (height !== "full" && ref.current && isPhone()) typedNoMore(ref.current);
+  }, [height, ref]);
+
+  // A finger on a field of the panel, on a phone, as a phone's own sheets do it: one tap, and
+  // the panel rises all the way up as the keyboard comes, the cursor in the field. The phone
+  // is left out of it: its own focus comes as the finger lifts, and it scrolls the page to show
+  // the field - the page and the panel moving at once was the jump, going from one field to the
+  // other too - and a panel rising under the finger could make it take the tap for nothing at
+  // all, so that a second one was needed. So the field is focused here, without a scroll, with
+  // the panel already up. A field already typed in is the phone's: the finger puts the cursor.
+  const tapped = useRef<{ field: HTMLInputElement; x: number; y: number } | null>(null);
+
+  function touchStarted(event: TouchEvent<HTMLDivElement>) {
+    tapped.current = null;
+    const field = (event.target as Element).closest("input");
+    if (!isPhone() || !field || field === document.activeElement || event.touches.length !== 1)
+      return;
+    const { clientX: x, clientY: y } = event.touches[0];
+    tapped.current = { field, x, y };
+  }
+
+  function touchEnded(event: TouchEvent<HTMLDivElement>) {
+    const was = tapped.current;
+    tapped.current = null;
+    const finger = event.changedTouches[0];
+    if (!was || !finger || Math.hypot(finger.clientX - was.x, finger.clientY - was.y) > TAP) return; // not a tap: the panel or what is in it moved
+    event.preventDefault(); // no focus, scroll or click of the phone's own
+    if (height !== "full") rise();
+    was.field.focus({ preventScroll: true });
+    // the cursor at the end of what is written, as a tap there would put it
+    const end = was.field.value.length;
+    if (was.field.selectionStart === was.field.selectionEnd) was.field.setSelectionRange(end, end);
+  }
+
+  // All the way up at once, so that the field is high on the screen before the keyboard comes;
+  // drawn where it was, it slides into its place, without its layout changing on the way.
+  function rise() {
     const panel = ref.current;
-    const target = event.target as Element;
-    if (!panel || !isPhone() || event.pointerType !== "touch" || height === "full") return;
-    if (!target.closest("input, textarea")) return;
+    if (!panel) return;
     const before = panel.getBoundingClientRect().top;
     panel.dataset.glide = "none"; // its own glide stays out of it (usePanelHeight.ts)
     flushSync(() => setHeight("full"));
     const after = panel.getBoundingClientRect().top;
     if (lessMotion() || Math.abs(before - after) < 2) return;
     panel.animate([{ transform: `translateY(${before - after}px)` }, { transform: "none" }], {
-      duration: 380,
+      duration: RISE_MS,
       easing: EASE,
     });
   }
@@ -118,7 +156,9 @@ export default function Panel({
       style={{ "--panel-height": HEIGHT[height] } as CSSProperties}
       data-height={height}
       onFocus={focused}
-      onPointerDown={touchedField}
+      onTouchStart={touchStarted}
+      onTouchEnd={touchEnded}
+      onTouchCancel={() => (tapped.current = null)}
     >
       {/* only on a phone, where the panel is a sheet along the bottom */}
       <button

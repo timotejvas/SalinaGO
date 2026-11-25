@@ -82,14 +82,18 @@ export function fitTo(map: MapLibreMap, places: Place[], room = NO_SPACE) {
   );
 }
 
-// Moves the camera to one place, closer when the map is zoomed out.
-// `space` as in fitTo.
+// Moves the camera to one place, closer when the map is zoomed out: into the middle of the
+// room the panel leaves (`space` as in fitTo).
+// As an offset, not as padding: padding given to a move stays with the map, and every move
+// after it kept that room free on top of its own - after a stop or a vehicle was looked at on
+// a phone, the next line chosen asked for more room than the map has, and the camera did not
+// move at all.
 export function focusOn(map: MapLibreMap, place: Place, room = NO_SPACE) {
   const space = fitting(map, room);
   map.flyTo({
     center: [place.lon, place.lat],
     zoom: Math.max(map.getZoom(), FOCUS_ZOOM),
-    padding: { top: space.top, left: space.left, right: 0, bottom: space.bottom },
+    offset: [space.left / 2, (space.top - space.bottom) / 2],
     duration: FOCUS_MS,
   });
 }

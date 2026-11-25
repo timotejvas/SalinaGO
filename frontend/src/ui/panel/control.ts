@@ -3,10 +3,12 @@
 
 import { isPhone } from "../../screen";
 
-// how tall it stands, as a share of the screen: put away, only its handle left to pull it back
-// by; its top showing; half the screen; almost all of it. It stands only as tall as what is in
-// it, up to that.
-export const HEIGHT = { away: 5, peek: 14, half: 50, full: 92 } as const;
+// How tall it stands, as a share of the screen - three, as a phone's own sheets: down at the
+// edge with its top showing (the modes, or the title of what is open), so the map is free and
+// the panel a pull away; half the screen, map and panel side by side; all the way up, to type
+// or to read a long list. It stands only as tall as what is in it, up to that. (All the way up
+// it reaches from under the phone's top bar, which is a little more than this - Panel.css.)
+export const HEIGHT = { peek: 14, half: 50, full: 92 } as const;
 export type Height = keyof typeof HEIGHT;
 const HEIGHTS = Object.values(HEIGHT); // from the lowest
 

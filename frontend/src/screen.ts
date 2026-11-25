@@ -28,11 +28,6 @@ export function usePhone() {
   );
 }
 
-// How tall the screen is that is left to see: above the keyboard of a phone, when it is out.
-export function visibleHeight() {
-  return window.visualViewport?.height ?? document.documentElement.clientHeight;
-}
-
 // The curve most things move by, for animations started from code: --ease of
 // styles/theme.css, which the styles use.
 export const EASE = "cubic-bezier(0.32, 0.72, 0, 1)";

@@ -32,7 +32,6 @@ import type { MapStation } from "./logic/timetable/stations";
 import { closeStation, onStationChange, setStationsClickable } from "./map/transit/stationsLayer";
 import { vehiclesOfLine, type LiveStatus, type Vehicle } from "./logic/live/vehicles";
 import { arrive, keepInSight, type Space } from "./map/camera";
-import { visibleHeight } from "./screen";
 import { VERSION } from "./version";
 
 // ---------- settings ----------
@@ -309,11 +308,10 @@ function panelSpace(panel: HTMLElement | null): Space {
   const atBottom = rect.width > window.innerWidth / 2;
   if (!atBottom) return { left: rect.right, top: 0, bottom: 0 };
   // a sheet: as tall as it is going to stand - it may still be gliding there. The map is as
-  // tall as the page; what is left of the screen above a keyboard is the visual viewport, by
-  // which the sheet measures its heights (ui/panel/useKeyboard.ts)
+  // tall as the page, and the sheet measures its heights by it (ui/panel/Panel.css)
   const page = document.documentElement.clientHeight;
   const share = HEIGHT[panel.dataset.height as Height] ?? 0;
-  const going = Math.min(panel.scrollHeight, (share / 100) * visibleHeight());
+  const going = Math.min(panel.scrollHeight, (share / 100) * page);
   return { left: 0, top: 0, bottom: Math.max(going, page - rect.top) };
 }
 

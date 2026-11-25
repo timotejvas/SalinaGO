@@ -227,16 +227,18 @@
    grows here, because a finger is not a cursor. */
 @media (max-width: 600px) {
   /* as tall as what is in it, up to the height it was pulled to (--panel-height, a share of
-     the screen the keyboard leaves - useKeyboard.ts); it glides between them (usePanelHeight.ts) */
+     the screen); it glides between them (usePanelHeight.ts). A keyboard matters only all the way
+     up, the one height at which one is typed: below it there is no keyboard (Panel.tsx), and
+     coming down, the panel glides to a height that does not wait for the keyboard to go */
   .panel {
     /* what is left above it, all the way up: the phone's own top bar, and a little more */
     --full-gap: max(56px, calc(env(safe-area-inset-top, 0px) + 12px));
     top: auto;
-    bottom: var(--keyboard, 0px); /* on the keyboard, when there is one (useKeyboard.ts) */
+    bottom: 0;
     left: 0;
     right: 0;
     width: auto;
-    max-height: calc(var(--panel-height, 50) * var(--screen-1, 1dvh));
+    max-height: calc(var(--panel-height, 50) * 1dvh);
     padding: 0 var(--gap-wide);
     border-width: 1px 0 0;
     border-radius: 20px 20px 0 0;
@@ -255,21 +257,24 @@
      covers the bottom half; down at the edge it shows its top only, or only its handle; and
      under a finger it is exactly where the finger has it */
   .panel.held {
-    height: calc(var(--panel-height) * var(--screen-1, 1dvh));
+    height: calc(var(--panel-height) * 1dvh);
   }
   /* all the way up its top stands at one place under the phone's own top bar, keyboard or not:
      the keyboard moves its bottom only, never its top - as a share of what is seen, the top
      would move as the keyboard took its room */
   .panel[data-height="full"]:not(.held) {
-    height: calc(var(--screen-1, 1dvh) * 100 - var(--full-gap));
-    max-height: none; /* the share of the screen does not hold it down here */
+    /* from under the top bar - of what is seen, wherever the phone has moved it to - down to
+       the bottom of the screen, under the keyboard too: the keyboard does not move it at all,
+       and no map shows between it and the keyboard; what is in it ends above the keyboard.
+       Standing on the bottom as at every other height, it glides up and down by its top. */
+    height: calc(100dvh - var(--full-gap) - var(--view-top, 0px));
+    max-height: none;
+    padding-bottom: var(--keyboard, 0px);
   }
   /* Down at the edge it shows whole things, never a row cut in half: the modes only (or, with
-     something open, the top of it, fading out); put away, its handle only. What is under them
+     something open, the top of it, fading out). What is under them
      is still there, scrolled as it was, and comes back as the sheet is pulled up. */
-  .panel[data-height="peek"]:not(.held) .panel-top:not(.away) ~ .panel-body,
-  .panel[data-height="away"]:not(.held) .panel-body,
-  .panel[data-height="away"]:not(.held) .panel-top {
+  .panel[data-height="peek"]:not(.held) .panel-top:not(.away) ~ .panel-body {
     flex: 0 0 0;
     min-height: 0;
     margin: 0;
@@ -279,7 +284,7 @@
     pointer-events: none;
   }
   .panel[data-height="peek"]:not(.held):has(.panel-top.away) {
-    height: calc(var(--panel-height) * var(--screen-1, 1dvh));
+    height: calc(var(--panel-height) * 1dvh);
   }
   .panel[data-height="peek"]:not(.held) .panel-top.away ~ .panel-body {
     overflow: hidden;
