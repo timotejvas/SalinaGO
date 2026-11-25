@@ -10,8 +10,7 @@
     "lint": "oxlint",
     "format": "prettier --write .",
     "data": "node scripts/build-data.mjs",
-    "data:update": "node scripts/update-data.mjs",
-    "data:schedule": "sh scripts/macos/schedule-update.sh"
+    "data:update": "node scripts/update-data.mjs"
   },
   "dependencies": {
     "maplibre-gl": "^6.16.0",

@@ -5,11 +5,12 @@
 // of the GTFS, so the two are always built together, from the same files.
 //
 // Asking costs one small request (the date of the file, not the file), so it can be run often:
-// scripts/macos/schedule-update.sh makes a Mac run it every hour (see docs/DATA.md). When a step fails, everything is put
-// back as it was - the old timetable keeps working - and it says why.
+// GitHub runs it every hour (.github/workflows/update-data.yml). When a step fails, everything is
+// put back as it was - the old timetable keeps working - and it says why.
 //
 // Run from the frontend/ folder:  npm run data:update        (only when there is a new one)
 //                                 npm run data:update -- --force   (download and build anyway)
+//                                 npm run data:update -- --check   (only say whether there is one)
 
 import fs from "node:fs";
 import path from "node:path";
@@ -27,6 +28,28 @@ const STALE_LOCK_MS = 2 * 3600 * 1000; // no build takes this long
 // ------------------------------
 
 const force = process.argv.includes("--force");
+const check = process.argv.includes("--check");
+
+// only asking: says whether there is a new one, and tells GitHub too (the steps that download and
+// build run only then)
+if (check) {
+  try {
+    const { version, same } = await ask();
+    say(
+      same
+        ? `Up to date: the GTFS of ${version.lastModified}.`
+        : `New GTFS at KORDIS (${version.lastModified}).`,
+    );
+    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `new=${!same}\n`);
+  } catch (error) {
+    // not an error of ours: KORDIS may be away for a moment, and the next hour asks again. A
+    // warning on GitHub (::warning::), not a failed run and an email every hour it lasts.
+    say(`::warning::Asking KORDIS failed: ${error.message}`);
+    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, "new=false\n");
+  }
+  process.exit();
+}
+
 fs.mkdirSync(WORK, { recursive: true });
 
 // one run at a time: an hourly run must not start while a long build is still going. A lock
@@ -44,14 +67,7 @@ try {
 
 try {
   // ---------- 1. is there a new one? ----------
-  const head = await fetch(SOURCE, { method: "HEAD" });
-  if (!head.ok) throw new Error(`KORDIS answered ${head.status} for ${SOURCE}`);
-  const version = {
-    lastModified: head.headers.get("last-modified"),
-    etag: head.headers.get("etag"),
-  };
-  const known = fs.existsSync(STAMP) ? JSON.parse(fs.readFileSync(STAMP, "utf8")) : {};
-  const same = known.lastModified === version.lastModified && (known.etag ?? null) === version.etag;
+  const { version, known, same } = await ask();
   if (same && !force) {
     say(`Up to date: the GTFS of ${version.lastModified}.`);
   } else {
@@ -94,7 +110,8 @@ async function update(version, known) {
   for (const file of BUILT) {
     if (fs.existsSync(file)) fs.copyFileSync(file, path.join(backup, path.basename(file)));
   }
-  fs.renameSync(GTFS, previous);
+  // (a fresh copy of the repository, or GitHub, has no timetable yet: nothing to keep then)
+  if (fs.existsSync(GTFS)) fs.renameSync(GTFS, previous);
   fs.renameSync(fresh, GTFS);
 
   try {
@@ -103,7 +120,7 @@ async function update(version, known) {
   } catch (error) {
     // back to the old timetable, and to what was built from it
     fs.rmSync(GTFS, { recursive: true, force: true });
-    fs.renameSync(previous, GTFS);
+    if (fs.existsSync(previous)) fs.renameSync(previous, GTFS);
     for (const file of BUILT) {
       const kept = path.join(backup, path.basename(file));
       if (fs.existsSync(kept)) fs.copyFileSync(kept, file);
@@ -115,6 +132,39 @@ async function update(version, known) {
   // the download and the old timetable are of no use any more
   for (const done of [zip, previous, backup]) fs.rmSync(done, { recursive: true, force: true });
   say(`Timetable updated: valid ${validFrom} - ${validTo}.`, true);
+}
+
+// ---------- 3. which version ----------
+
+// What KORDIS has now (the date and the ETag of its file), what we have, and whether they are
+// the same file.
+async function ask() {
+  const head = await fetch(SOURCE, { method: "HEAD" });
+  if (!head.ok) throw new Error(`KORDIS answered ${head.status} for ${SOURCE}`);
+  const version = {
+    lastModified: head.headers.get("last-modified"),
+    etag: head.headers.get("etag"),
+  };
+  const known = ourVersion();
+  return { version, known, same: sameVersion(known, version) };
+}
+
+// The version we have: the stamp in data/gtfs/ when it is there, otherwise the date the built
+// timetable carries - a fresh copy of the repository, and GitHub, have no data/gtfs/.
+function ourVersion() {
+  if (fs.existsSync(STAMP)) return JSON.parse(fs.readFileSync(STAMP, "utf8"));
+  if (!fs.existsSync(BUILT[0])) return {};
+  const { published } = JSON.parse(fs.readFileSync(BUILT[0], "utf8"));
+  return published ? { lastModified: published } : {};
+}
+
+// The same file: published at the same moment (however the date is written), and with the same
+// ETag where both are known.
+function sameVersion(known, version) {
+  if (!known.lastModified || !version.lastModified) return false;
+  const sameDate = Date.parse(known.lastModified) === Date.parse(version.lastModified);
+  const sameTag = !known.etag || !version.etag || known.etag === version.etag;
+  return sameDate && sameTag;
 }
 
 // Unpacks a zip file: with unzip on a Mac and on Linux, with tar on Windows (10 and later),

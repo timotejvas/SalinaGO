@@ -1,0 +1,87 @@
+# Keeps the timetable on the site current, without anyone's computer. Every hour it asks KORDIS
+# whether a new GTFS is out - one small request, a few seconds. When one is, it downloads it and
+# OpenStreetMap of Czechia, calculates the routes (pfaedle, in Docker), builds the data, commits
+# frontend/public and has the site deployed. The timetable and the map are thrown away with the
+# run; only what the site loads is kept.
+#
+# By hand: Actions -> Update data -> Run workflow ("Build again" builds even without a new one,
+# with a fresh OpenStreetMap).
+name: Update data
+
+on:
+  schedule:
+    - cron: "17 * * * *" # every hour, at a minute when GitHub is less busy than at :00
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Build again, even without a new timetable
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # to commit the new data
+  actions: write # to start the deployment
+
+# one update at a time; an hourly run waits for a long build rather than starting a second one
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      BUILD: ${{ inputs.force && 'yes' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Is there a new timetable?
+        id: check
+        run: node scripts/update-data.mjs --check
+
+      - name: Install
+        if: steps.check.outputs.new == 'true' || env.BUILD
+        run: npm ci
+
+      - name: Download OpenStreetMap of Czechia
+        if: steps.check.outputs.new == 'true' || env.BUILD
+        run: |
+          mkdir -p ../data/osm
+          curl --fail --location --silent --show-error --retry 3 \
+            --output ../data/osm/czech-republic.osm.pbf \
+            https://download.geofabrik.de/europe/czech-republic-latest.osm.pbf
+
+      - name: Build the data
+        if: steps.check.outputs.new == 'true' || env.BUILD
+        run: npm run data:update -- ${{ env.BUILD && '--force' || '' }}
+
+      - name: Commit
+        id: commit
+        if: steps.check.outputs.new == 'true' || env.BUILD
+        run: |
+          git add public/transit.json public/transfers.json public/walk.bin public/addresses.json
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --message "Timetable of $(node --print 'require("./public/transit.json").published.slice(0, 10)')"
+          git pull --rebase
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # a push made by a workflow does not start other workflows, so the deployment is asked
+      # for by name
+      - name: Deploy
+        if: steps.commit.outputs.changed == 'true'
+        run: gh workflow run deploy.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

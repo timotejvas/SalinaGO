@@ -201,7 +201,8 @@ sequenceDiagram
 SalinaGO/
 ├── .github/workflows/
 │   ├── ci.yml                   every push: npm audit, Prettier, oxlint, types and build
-│   └── deploy.yml               every push to main: build, publish on GitHub Pages
+│   ├── deploy.yml               every push to main: build, publish on GitHub Pages
+│   └── update-data.yml          every hour: a new timetable? download, build, commit, deploy
 ├── data/
 │   ├── gtfs/                    the official KORDIS timetable (.txt) and SOURCE.json, its version - not in git
 │   ├── osm/                     OpenStreetMap of Czechia, for the routes and walking (not in git)
@@ -348,16 +349,15 @@ SalinaGO/
 <details>
 <summary><b>📁 <code>src/styles/</code> and <code>scripts/</code></b></summary>
 
-| File                               | What it is                                                                                                                                                                                                                                   |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `styles/theme.css`                 | The design tokens: the sizes of type, the spaces, the radii, the colours (`--ink`, `--ink-dim`, `--ink-faint`, `--late`, `--brand`, `--error`, `--focus` …) and the four curves of motion `--ease`, `--ease-in-out`, `--settle`, `--spring`. |
-| `styles/page.css`                  | The page, the map and its credits, the error box, the scrollbars, the focus ring, the feedback of a press, the segmented control, the line badge, the live waves.                                                                            |
-| `scripts/build-data.mjs`           | GTFS and pfaedle's routes → `public/transit.json`.                                                                                                                                                                                           |
-| `scripts/build-walk.mjs`           | OpenStreetMap → `walk.bin`, `addresses.json` and `transfers.json`.                                                                                                                                                                           |
-| `scripts/update-data.mjs`          | Downloads a new GTFS when KORDIS publishes one and builds everything again; puts the old files back when anything fails.                                                                                                                     |
-| `scripts/gtfs/*.mjs`               | Reading the GTFS: the calendar, the stations, the variants, the transfers, the routes, running pfaedle.                                                                                                                                      |
-| `scripts/osm/pbf.mjs`              | Reads an OpenStreetMap `.pbf` file without any library (zlib and Protocol Buffers by hand).                                                                                                                                                  |
-| `scripts/macos/schedule-update.sh` | Runs the update every hour on a Mac (launchd).                                                                                                                                                                                               |
+| File                      | What it is                                                                                                                                                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `styles/theme.css`        | The design tokens: the sizes of type, the spaces, the radii, the colours (`--ink`, `--ink-dim`, `--ink-faint`, `--late`, `--brand`, `--error`, `--focus` …) and the four curves of motion `--ease`, `--ease-in-out`, `--settle`, `--spring`. |
+| `styles/page.css`         | The page, the map and its credits, the error box, the scrollbars, the focus ring, the feedback of a press, the segmented control, the line badge, the live waves.                                                                            |
+| `scripts/build-data.mjs`  | GTFS and pfaedle's routes → `public/transit.json`.                                                                                                                                                                                           |
+| `scripts/build-walk.mjs`  | OpenStreetMap → `walk.bin`, `addresses.json` and `transfers.json`.                                                                                                                                                                           |
+| `scripts/update-data.mjs` | Downloads a new GTFS when KORDIS publishes one and builds everything again; puts the old files back when anything fails.                                                                                                                     |
+| `scripts/gtfs/*.mjs`      | Reading the GTFS: the calendar, the stations, the variants, the transfers, the routes, running pfaedle.                                                                                                                                      |
+| `scripts/osm/pbf.mjs`     | Reads an OpenStreetMap `.pbf` file without any library (zlib and Protocol Buffers by hand).                                                                                                                                                  |
 
 </details>
 

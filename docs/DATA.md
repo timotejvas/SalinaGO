@@ -266,27 +266,39 @@ with diversions, at any day and hour (the one checked on 24 Nov 2026 was dated F
 21:47). The copy on data.brno.cz follows it once a week, in the night to Monday. So the app takes
 the file from KORDIS directly, and asks for it often.
 
-Run from `frontend/`:
+**On GitHub, by itself.** `.github/workflows/update-data.yml` runs every hour, on GitHub's
+servers - no computer of ours needs to be on:
 
-- `npm run data:update` asks KORDIS for the date of its file (`Last-Modified`, `ETag`) - one small
-  request, not the file. When it is newer than the one in `data/gtfs/SOURCE.json`, it downloads
-  it into `data/gtfs/`, builds `public/transit.json` (`build-data.mjs`) and then
+1. It asks KORDIS for the date of its file (`Last-Modified`, `ETag`): one small request, a few
+   seconds. Ours is the date `public/transit.json` was built from (`published`).
+2. Only when KORDIS has a newer one, it downloads it and OpenStreetMap of Czechia (about 900 MB,
+   so the routes, the paths and the addresses are always as fresh as the timetable), calculates
+   the routes with pfaedle in Docker, and builds the four files of `frontend/public/`.
+3. It commits them as `github-actions[bot]` ("Timetable of 2026-11-20") and starts
+   `deploy.yml`, which puts them online. A new timetable is usually on the site within an hour or so of KORDIS publishing it.
+4. The download, the map and pfaedle's files are thrown away with the run; only what the site
+   loads is kept in the repository.
+
+When KORDIS does not answer, the run only notes a warning and the next hour asks again. When a
+build fails, the old files stay and the site keeps working with them; GitHub emails the owner of
+the repository. By hand: **Actions → Update data → Run workflow**, with _Build again_ to build
+even without a new timetable.
+
+**On a computer** (run from `frontend/`), the same script:
+
+- `npm run data:update` asks KORDIS for the date of its file. When it is newer than ours - the
+  one in `data/gtfs/SOURCE.json`, or without it the one `public/transit.json` was built from -
+  it downloads it into `data/gtfs/`, builds `public/transit.json` (`build-data.mjs`) and then
   `public/transfers.json` (`build-walk.mjs`, which names stations by the ids of this GTFS), and
   writes the new date. When anything fails, the old timetable and the old files are put back and
-  it says why. `-- --force` builds again without a new file. Only one update runs at a time
-  (`data/.update/lock`; a lock older than two hours is left from a run that was stopped).
+  it says why. `-- --force` builds again without a new file; `-- --check` only says whether there
+  is one. Only one update runs at a time (`data/.update/lock`; a lock older than two hours is
+  left from a run that was stopped).
 - While it runs, the app keeps working with the files it has: each one is replaced only when it
   is built.
-- The site online is updated by committing the new `frontend/public/` and pushing to `main`: `.github/workflows/deploy.yml` checks, builds and publishes it.
-- `npm run data:schedule` (on a Mac) runs that every hour and once at login, in the background
-  (launchd). It logs to `~/Library/Logs/salinago-update.log` and shows a notification when the
-  timetable changed or the update failed. `sh scripts/macos/schedule-update.sh --remove`
-  switches it off.
-- Building needs Docker running (pfaedle) and `data/osm/czech-republic.osm.pbf`; download a new
-  one from time to time (e.g. monthly) from
-  https://download.geofabrik.de/europe/czech-republic-latest.osm.pbf, then
-  `npm run data:update -- --force`. `build-walk.mjs` reads the same file, so the paths and the
-  addresses are refreshed with it.
+- Building needs Docker running (pfaedle) and `data/osm/czech-republic.osm.pbf`, from
+  https://download.geofabrik.de/europe/czech-republic-latest.osm.pbf. `build-walk.mjs` reads the
+  same file, so the paths and the addresses are refreshed with it.
 
 ## What leaves the browser
 

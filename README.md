@@ -60,7 +60,7 @@ flowchart LR
 
 1. **Prepared once.** Node.js scripts turn the official timetable and OpenStreetMap into four
    static files: stations, lines, trips and their routes; the paths to walk along; the
-   addresses. An hourly check picks up a new timetable soon after KORDIS publishes it.
+   addresses. GitHub checks for a new timetable every hour and rebuilds them by itself.
 2. **Worked out in your browser.** There is no backend. The browser loads those files, connects
    to the city's WebSocket stream and does everything else itself: searching, routing,
    predicting where each vehicle is, following your ride.
@@ -94,7 +94,7 @@ Every file, the data flow and the whole story of the refactor: **[docs/ARCHITECT
 | **"Which tram is mine?"** The stream does not say which trip a vehicle runs.                                                               | Matched by route and time, then remembered by its number; 3 stops before a change, the next vehicle is found and shown coming.                                                                                                        |
 | **A journey planner with no server.**                                                                                                      | RAPTOR with up to two changes and walks along 218 000 points of OpenStreetMap paths, all in the browser; each change moved as late as the same trips allow.                                                                           |
 | **A web page that feels like an app on a phone.**                                                                                          | A sheet that follows the finger, a panel that stays above the iPhone keyboard, fields that do not zoom the page, a camera that keeps the panel's room free.                                                                           |
-| **A timetable that changes without notice.**                                                                                               | Checked every hour; a new one is downloaded and built, and the old one is put back if anything fails.                                                                                                                                 |
+| **A timetable that changes without notice.**                                                                                               | GitHub checks every hour and, when a new one is out, downloads it, builds it and deploys it - no computer needed; the old one stays if anything fails.                                                                                |
 | **Safe by default.**                                                                                                                       | A strict Content Security Policy, nothing from outside inserted as HTML, no cookies, a security audit in CI.                                                                                                                          |
 
 More than thirty fixes, each as _problem → cause → solution_: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md#fixes-and-refactoring).
@@ -136,15 +136,14 @@ The prepared timetable is in the repository, so the app runs straight away.
 
 Run from `frontend/`.
 
-| Command                 | What it does                                                          |
-| ----------------------- | --------------------------------------------------------------------- |
-| `npm run dev`           | starts the app on http://localhost:5173, reloading as you edit        |
-| `npm run build`         | checks the types and builds the app into `dist/`                      |
-| `npm run preview`       | serves the built `dist/` to try it                                    |
-| `npm run lint`          | checks the code for common mistakes (oxlint)                          |
-| `npm run format`        | formats all code the same way (Prettier)                              |
-| `npm run data:update`   | downloads a new timetable when KORDIS has one and builds it all again |
-| `npm run data:schedule` | on a Mac: runs `data:update` every hour in the background             |
+| Command               | What it does                                                          |
+| --------------------- | --------------------------------------------------------------------- |
+| `npm run dev`         | starts the app on http://localhost:5173, reloading as you edit        |
+| `npm run build`       | checks the types and builds the app into `dist/`                      |
+| `npm run preview`     | serves the built `dist/` to try it                                    |
+| `npm run lint`        | checks the code for common mistakes (oxlint)                          |
+| `npm run format`      | formats all code the same way (Prettier)                              |
+| `npm run data:update` | downloads a new timetable when KORDIS has one and builds it all again |
 
 _Report a problem_ needs a [Web3Forms](https://web3forms.com) key: put the line
 `VITE_REPORT_KEY=<your key>` into `frontend/.env.local`. Building the data again needs Docker and OpenStreetMap - see
